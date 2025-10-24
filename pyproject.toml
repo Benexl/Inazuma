@@ -1,26 +1,16 @@
-[tool.poetry]
+[project]
 name = "inazuma"
-version = "0.1.0"
-description = "A gui wrapper over fastanime"
-authors = ["Benex254 <benextempest@gmail.com>"]
-license = "MIT"
+version = "3.2.7"
+description = "A gui wrapper over viu"
+license = "UNLICENSE"
 readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "ffpyplayer>=4.5.3",
+    "kivymd",
+    "viu-media[standard]",
+]
 
-[tool.poetry.dependencies]
-python = "^3.12"
-fastanime = "^2.5.3"
-Kivy = "^2.3.0"
-yt-dlp = "^2024.9.27"
-kivymd = { url = "https://github.com/kivymd/KivyMD/archive/master.zip" }
-ffpyplayer = "^4.5.1"
-
-[tool.poetry.group.dev.dependencies]
-pyright = "^1.1.382.post1"
-ruff = "^0.6.8"
-
-[tool.poetry.scripts]
-inazuma = 'inazuma:main'
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.uv.sources]
+kivymd = { git = "https://github.com/kivymd/KivyMD.git" }
+viu-media = { git = "https://github.com/viu-media/viu.git" }
