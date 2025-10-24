@@ -1,5 +1,3 @@
-from fastanime.anilist import AniList
-
 from ..Utility.media_card_loader import media_card_loader
 from .base_model import BaseScreenModel
 

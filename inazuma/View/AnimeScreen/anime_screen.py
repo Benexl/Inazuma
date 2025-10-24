@@ -1,6 +1,6 @@
 import logging
 
-from fastanime.libs.anilist.types import AnilistBaseMediaDataSchema
+from viu_media.libs.media_api.types import MediaSearchResult
 from kivy.properties import ListProperty, ObjectProperty, StringProperty
 from kivy.uix.widget import Factory
 from kivymd.uix.button import MDButton
@@ -21,7 +21,7 @@ Factory.register("EpisodeButton", cls=EpisodeButton)
 class AnimeScreenView(BaseScreenView):
     """The anime screen view"""
 
-    current_anilist_data: "AnilistBaseMediaDataSchema | None" = None
+    current_anilist_data: "MediaSearchResult | None" = None
     current_server = ObjectProperty()
     current_link = StringProperty()
     current_servers = ListProperty([])
