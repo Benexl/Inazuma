@@ -7,7 +7,7 @@ from ..Model.anime_screen import AnimeScreenModel
 from ..View.AnimeScreen.anime_screen import AnimeScreenView
 
 if TYPE_CHECKING:
-    from fastanime.libs.anilist.types import AnilistBaseMediaDataSchema
+    from viu_media.libs.anilist.types import AnilistBaseMediaDataSchema
 
 Cache.register("data.anime", limit=20, timeout=600)
 

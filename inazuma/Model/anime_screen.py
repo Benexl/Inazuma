@@ -1,7 +1,8 @@
-from fastanime.anilist import AniList
-from fastanime.AnimeProvider import AnimeProvider
-from fastanime.libs.anilist.types import AnilistBaseMediaDataSchema
-from fastanime.Utility.utils import anime_title_percentage_match
+from viu_media.libs.media_api.api import create_api_client
+from viu_media.libs.provider.anime.provider import create_provider
+from viu_media.libs.media_api.types import MediaSearchResult
+from viu_media.cli.utils.search import find_best_match_title
+from viu_media.libs.provider.anime.types import ProviderName
 from kivy.cache import Cache
 from kivy.logger import Logger
 
@@ -9,7 +10,7 @@ from .base_model import BaseScreenModel
 
 Cache.register("streams.anime", limit=10)
 
-anime_provider = AnimeProvider("allanime", "true")
+anime_provider = create_provider(ProviderName.ALLANIME)
 
 
 class AnimeScreenModel(BaseScreenModel):
@@ -21,19 +22,20 @@ class AnimeScreenModel(BaseScreenModel):
     current_anilist_anime_id = "0"
     current_provider_anime_id = "0"
     current_title = ""
-    anilist_data: "AnilistBaseMediaDataSchema | None" = None
+    media_search_result: "MediaSearchResult | None" = None
 
     def get_anime_data_from_provider(
-        self, anilist_data: "AnilistBaseMediaDataSchema", is_dub, id=None
+        self, media_search_result: "MediaSearchResult", is_dub, id=None
     ):
         try:
-            if (self.anilist_data or {"id": -1})["id"] == anilist_data[
+            if (self.media_search_result or {"id": -1})["id"] == media_search_result[
                 "id"
             ] and self.current_anime_data:
                 return self.current_anime_data
             translation_type = "dub" if is_dub else "sub"
             search_results = anime_provider.search_for_anime(
-                anilist_data["title"]["romaji"] or anilist_data["title"]["english"],
+                media_search_result["title"]["romaji"]
+                or media_search_result["title"]["english"],
                 translation_type,
             )
 
@@ -42,10 +44,10 @@ class AnimeScreenModel(BaseScreenModel):
                 result = max(
                     _search_results,
                     key=lambda x: anime_title_percentage_match(
-                        x["title"], anilist_data
+                        x["title"], media_search_result
                     ),
                 )
-                self.current_anilist_anime_id = anilist_data["id"]
+                self.current_anilist_anime_id = media_search_result["id"]
                 self.current_provider_anime_id = result["id"]
                 self.current_anime_data = anime_provider.get_anime(result["id"])
                 if self.current_anime_data:

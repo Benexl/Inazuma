@@ -18,7 +18,7 @@ os.environ["FASTANIME_PROVIDER"] = "allanime"
 import random
 from typing import TYPE_CHECKING
 
-from fastanime.constants import USER_VIDEOS_DIR
+from viu_media.constants import USER_VIDEOS_DIR
 from kivy.resources import resource_find
 from kivy.uix.screenmanager import FadeTransition, ScreenManager
 from kivy.uix.settings import SettingsWithSidebar
@@ -28,7 +28,7 @@ from .View.components.media_card.media_card import MediaPopup
 from .View.screens import screens
 
 if TYPE_CHECKING:
-    from fastanime.libs.anime_provider.types import Server
+    from viu_media.libs.anime_provider.types import Server
 
 # from .Utility.data import themes_available
 # from .View.screens import screens
@@ -136,7 +136,7 @@ class Inazuma(MDApp):
 
     #
     def download_anime_video(self, url: str, anime_title, anime_server: "Server"):
-        from fastanime.Utility.downloader.downloader import downloader
+        from viu_media.Utility.downloader.downloader import downloader
 
         from .Utility.show_notification import show_notification
 
