@@ -10,12 +10,12 @@ from kivy.properties import (
 from kivymd.app import MDApp
 from kivymd.uix.behaviors import HoverBehavior
 from kivymd.uix.boxlayout import MDBoxLayout
+from viu_media.libs.media_api.types import MediaItem
 
 from .components.media_popup import MediaPopup
 
 
 class MediaCard(HoverBehavior, MDBoxLayout):
-    anilist_data = ObjectProperty()
     screen = ObjectProperty()
     anime_id = NumericProperty()
     title = StringProperty()
@@ -42,14 +42,27 @@ class MediaCard(HoverBehavior, MDBoxLayout):
     _popup_opened = False
     _title = ()
 
-    def __init__(self, trailer_url=None, **kwargs):
+    def __init__(self, media_item: MediaItem, **kwargs):
         super().__init__(**kwargs)
+        self.media_item = media_item
+        self.anime_id = media_item.id
+        self.title = media_item.title.english
+        self.episodes = str(media_item.episodes)
+        self.popularity = str(media_item.popularity)
+        self.favourites = str(media_item.favourites)
+        self.media_status = str(media_item.status.value)
+        self.genres = ", ".join([genre.value for genre in media_item.genres])
+        self.description = media_item.description or ""
+        self.cover_image_url = (
+            media_item.cover_image.medium if media_item.cover_image else ""
+        )
+        self.studios = ", ".join(
+            [studio.name for studio in media_item.studios if studio and studio.name]
+        )
+        self.tags = ", ".join([tag.name.value for tag in media_item.tags])
+
         self.orientation = "vertical"
-
         self.app: MDApp | None = MDApp.get_running_app()
-
-        if trailer_url:
-            self.trailer_url = trailer_url
         self.adaptive_size = True
 
     def on_touch_down(self, touch):
@@ -119,20 +132,6 @@ class MediaCard(HoverBehavior, MDBoxLayout):
             popup.title = self.title
             popup.bind(on_dismiss=self.on_dismiss, on_open=self.on_popup_open)
             popup.open(self)
-
-    def _get_trailer(self):
-        if self.trailer_url:
-            return
-        if trailer := self._trailer_url:
-            # trailer stuff
-            from ....Utility.media_card_loader import media_card_loader
-
-            if trailer_url := media_card_loader.get_trailer_from_yt_dlp(
-                trailer, self.title
-            ):
-                self.trailer_url = trailer_url
-            else:
-                self._trailer_url = ""
 
     # ---------------respond to user actions and call appropriate model-------------------------
     def on_is_in_my_list(self, instance, in_user_anime_list):
