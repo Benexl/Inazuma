@@ -1,37 +1,13 @@
-#
-# def setup_app():
-#     os.environ["KIVY_VIDEO"] = "ffpyplayer"  # noqa: E402
-#     Config.set("graphics", "width", "1000")  # noqa: E402
-#     Config.set("graphics", "minimum_width", "1000")  # noqa: E402
-#     Config.set("kivy", "window_icon", resource_find("logo.ico"))  # noqa: E402
-#     Config.write()  # noqa: E402
-#
-#     Loader.num_workers = 5
-#     Loader.max_upload_per_frame = 10
-#
-#     resource_add_path(ASSETS_DIR)
-#     resource_add_path(CONFIGS_DIR)
-#
-import os
-
-os.environ["FASTANIME_PROVIDER"] = "allanime"
 import random
-from typing import TYPE_CHECKING
 
-from viu_media.constants import USER_VIDEOS_DIR
 from kivy.resources import resource_find
 from kivy.uix.screenmanager import FadeTransition, ScreenManager
 from kivy.uix.settings import SettingsWithSidebar
 from kivymd.app import MDApp
+from viu_media.core.config import AppConfig
 
 from .View.components.media_card.media_card import MediaPopup
 from .View.screens import screens
-
-if TYPE_CHECKING:
-    from viu_media.libs.anime_provider.types import Server
-
-# from .Utility.data import themes_available
-# from .View.screens import screens
 
 
 class Inazuma(MDApp):
@@ -40,6 +16,11 @@ class Inazuma(MDApp):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        from inazuma.core.viu import Viu
+
+        self.viu_config = AppConfig()
+
+        self.viu = Viu(self.viu_config)
         # self.icon = resource_find("logo.png")
 
         self.load_all_kv_files(self.directory)
@@ -59,9 +40,9 @@ class Inazuma(MDApp):
         #     if theme_style := config.get("Preferences", "theme_style"):
         #         self.theme_cls.theme_style = theme_style
         #
-        self.anime_screen = self.manager_screens.get_screen("anime screen")
-        self.search_screen = self.manager_screens.get_screen("search screen")
-        self.download_screen = self.manager_screens.get_screen("downloads screen")
+        # self.anime_screen = self.manager_screens.get_screen("anime screen")
+        # self.search_screen = self.manager_screens.get_screen("search screen")
+        # self.download_screen = self.manager_screens.get_screen("downloads screen")
         self.home_screen = self.manager_screens.get_screen("home screen")
         return self.manager_screens
 
@@ -70,12 +51,35 @@ class Inazuma(MDApp):
 
     def generate_application_screens(self) -> None:
         for i, name_screen in enumerate(screens.keys()):
-            model = screens[name_screen]["model"]()
+            model = screens[name_screen]["model"](self.viu)
             controller = screens[name_screen]["controller"](model)
             view = controller.get_view()
             view.manager_screens = self.manager_screens
             view.name = name_screen
             self.manager_screens.add_widget(view)
+
+    # def search_for_anime(self, search_field, **kwargs):
+    #     if self.manager_screens.current != "search screen":
+    #         self.manager_screens.current = "search screen"
+    #     self.search_screen.handle_search_for_anime(search_field, **kwargs)
+    #
+    # def show_anime_screen(self, anilist_data, caller_screen_name: str):
+    #     self.manager_screens.current = "anime screen"
+    #     self.anime_screen.controller.update_anime_view(anilist_data, caller_screen_name)
+
+    #
+    def download_anime_video(self, url: str, anime_title, anime_server):
+        pass
+        # from viu_media.cli.service.download import DownloadService
+        #
+        # from .Utility.show_notification import show_notification
+        #
+        # self.download_screen.new_download_task(anime_title)
+        # show_notification("New Download", f"{anime_title[0]} episode: {anime_title[1]}")
+        # progress_hook = self.download_screen.on_episode_download_progress
+        # downloader.download_file(
+        #     url, anime_title, anime_server["episode_title"], USER_VIDEOS_DIR
+        # )
 
     #
     # def build_config(self, config):
@@ -113,12 +117,8 @@ class Inazuma(MDApp):
     #
     # def on_stop(self):
     #     pass
-
-    def search_for_anime(self, search_field, **kwargs):
-        if self.manager_screens.current != "search screen":
-            self.manager_screens.current = "search screen"
-        self.search_screen.handle_search_for_anime(search_field, **kwargs)
-
+    #
+    #
     # def add_anime_to_user_anime_list(self, id: int):
     #     updated_list = user_data_helper.get_user_anime_list()
     #     updated_list.append(id)
@@ -130,23 +130,21 @@ class Inazuma(MDApp):
     #         updated_list.remove(id)
     #     user_data_helper.update_user_anime_list(updated_list)
     #
-    def show_anime_screen(self, anilist_data, caller_screen_name: str):
-        self.manager_screens.current = "anime screen"
-        self.anime_screen.controller.update_anime_view(anilist_data, caller_screen_name)
-
-    #
-    def download_anime_video(self, url: str, anime_title, anime_server: "Server"):
-        from viu_media.Utility.downloader.downloader import downloader
-
-        from .Utility.show_notification import show_notification
-
-        self.download_screen.new_download_task(anime_title)
-        show_notification("New Download", f"{anime_title[0]} episode: {anime_title[1]}")
-        progress_hook = self.download_screen.on_episode_download_progress
-        downloader.download_file(
-            url, anime_title, anime_server["episode_title"], USER_VIDEOS_DIR
-        )
 
 
+#
+# def setup_app():
+#     os.environ["KIVY_VIDEO"] = "ffpyplayer"  # noqa: E402
+#     Config.set("graphics", "width", "1000")  # noqa: E402
+#     Config.set("graphics", "minimum_width", "1000")  # noqa: E402
+#     Config.set("kivy", "window_icon", resource_find("logo.ico"))  # noqa: E402
+#     Config.write()  # noqa: E402
+#
+#     Loader.num_workers = 5
+#     Loader.max_upload_per_frame = 10
+#
+#     resource_add_path(ASSETS_DIR)
+#     resource_add_path(CONFIGS_DIR)
+#
 def main():
     Inazuma().run()

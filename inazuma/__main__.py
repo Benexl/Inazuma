@@ -1,4 +1,4 @@
-from . import main
+from inazuma import main
 
 if __name__ == "__main__":
     main()

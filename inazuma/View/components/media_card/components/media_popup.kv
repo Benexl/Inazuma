@@ -25,16 +25,16 @@
         MDRelativeLayout:
             size_hint_y: None
             height: dp(280)
-            line_color:root.caller.has_trailer_color
+            line_color:root.caller.has_trailer_color if root.caller else [0,0,0]
             line_width:1
             # TODO: Remove the test source
             MediaPopupVideoPlayer:
                 id:player
-                source: root.caller.trailer_url #if root.caller.trailer_url else 'https://www088.vipanicdn.net/streamhls/abae70787c7bd2fcd4fab986c2a5aeba/ep.7.1703900604.m3u8'
+                source: root.caller.trailer_url if root.caller else 'https://www088.vipanicdn.net/streamhls/abae70787c7bd2fcd4fab986c2a5aeba/ep.7.1703900604.m3u8'
                 #thumbnail:app.default_anime_image
                 #state:"play" if root.caller.trailer_url else "stop"
-                on_state:
-                    root.caller._get_trailer()
+                # on_state:
+                    # root.caller._get_trailer()
                 # fit_mode:"fill"
                 size_hint_y: None
                 height: dp(280)
@@ -45,30 +45,30 @@
                 MDIcon:
                     icon: "star"
                     color:yellow
-                    disabled: not(root.caller.stars[0])
+                    disabled: not(root.caller.stars[0]) if root.caller else False
                 MDIcon:
                     color:yellow
-                    disabled: not(root.caller.stars[1])
+                    disabled: not(root.caller.stars[0]) if root.caller else False
                     icon: "star"
                 MDIcon:
                     color:yellow
-                    disabled: not(root.caller.stars[2])
+                    disabled: not(root.caller.stars[0]) if root.caller else False
                     icon: "star"
                 MDIcon:
                     color:yellow
-                    disabled: not(root.caller.stars[3])
+                    disabled: not(root.caller.stars[0]) if root.caller else False
                     icon: "star"
                 MDIcon:
                     color:yellow
                     icon: "star"
-                    disabled: not(root.caller.stars[4])
+                    disabled: not(root.caller.stars[0]) if root.caller else False
                 MDIcon:
                     color: yellow
                     icon: "star"
-                    disabled: not(root.caller.stars[5])
+                    disabled: not(root.caller.stars[0]) if root.caller else False
 
                 MDLabel:
-                    text: f"{root.caller.episodes} Episodes"
+                    text: f"{root.caller.episodes} Episodes" if root.caller else ""
                     halign:"right"
                     font_style:"Label"
                     role:"medium"
@@ -81,7 +81,7 @@
                 padding:"5dp"
                 pos_hint: {'bottom': 1}
                 SingleLineLabel:
-                    text:root.caller.media_status
+                    text:root.caller.media_status if root.caller else ""
                     opacity:.8
                     halign:"left"
                     font_style:"Label"
@@ -89,7 +89,7 @@
                     bold:True
                     pos_hint: {'center_y': .5}
                 SingleLineLabel:
-                    text:root.caller.first_aired_on
+                    text:root.caller.first_aired_on if root.caller else ""
                     opacity:.8
                     halign:"right"
                     font_style:"Label"
@@ -113,14 +113,14 @@
                             app.show_anime_screen(root.caller.anilist_data,root.caller.screen.name)
                     TooltipMDIconButton:
                         tooltip_text:"Add to your anime list"
-                        icon: "plus-circle" if not(root.caller.is_in_my_list) else "check-circle"
+                        icon: "plus-circle" if root.caller and not(root.caller.is_in_my_list) else "check-circle"
                         on_release:
                             root.caller.is_in_my_list = not(root.caller.is_in_my_list)
                             self.icon = "plus-circle" if not(root.caller.is_in_my_list) else "check-circle"
                     TooltipMDIconButton:
                         disabled:True
                         tooltip_text:"Coming soon"
-                        icon: "bell-circle" if not(root.caller.is_in_my_notify) else "bell-check"
+                        icon: "bell-circle" if root.caller and not(root.caller.is_in_my_notify) else "bell-check"
                 PopupBoxLayout:
                     pos_hint: {'center_y': 0.5}
                     orientation: 'vertical'
@@ -128,26 +128,26 @@
                     SingleLineLabel:
                         font_style:"Label"
                         role:"small"
-                        text: f"[color={get_hex_from_color(self.theme_cls.primaryColor)}]"+"Genres: "+"[/color]"+root.caller.genres
+                        text: f"[color={get_hex_from_color(self.theme_cls.primaryColor)}]"+"Genres: "+"[/color]"+root.caller.genres if root.caller else ""
                         markup:True
                     PopupBoxLayout:
                         SingleLineLabel:
                             font_style:"Label"
                             role:"small"
                             markup:True
-                            text: f"[color={get_hex_from_color(self.theme_cls.primaryColor)}]"+"Popularity: "+"[/color]"+root.caller.popularity
+                            text: f"[color={get_hex_from_color(self.theme_cls.primaryColor)}]"+"Popularity: "+"[/color]"+root.caller.popularity if root.caller else ""
                         SingleLineLabel:
                             font_style:"Label"
                             markup:True
                             role:"small"
-                            text: f"[color={get_hex_from_color(self.theme_cls.primaryColor)}]"+"Favourites: "+"[/color]"+root.caller.favourites
+                            text: f"[color={get_hex_from_color(self.theme_cls.primaryColor)}]"+"Favourites: "+"[/color]"+root.caller.favourites if root.caller else ""
             MDScrollView:
                 size_hint:1,1
                 do_scroll_y:True
                 MDLabel:
                     font_style:"Body"
                     role:"small"
-                    text:root.caller.description
+                    text:root.caller.description if root.caller else ""
                     adaptive_height:True
             # footer
             PopupBoxLayout:
@@ -156,19 +156,19 @@
                     font_style:"Label"
                     markup:True
                     role:"small"
-                    text: f"[color={get_hex_from_color(self.theme_cls.primaryColor)}]"+"Next Airing Episode: "+"[/color]"+root.caller.next_airing_episode
+                    text: f"[color={get_hex_from_color(self.theme_cls.primaryColor)}]"+"Next Airing Episode: "+"[/color]"+root.caller.next_airing_episode if root.caller else ""
                 SingleLineLabel:
                     font_style:"Label"
                     role:"small"
                     markup:True
-                    text: f"[color={get_hex_from_color(self.theme_cls.primaryColor)}]"+"Studios: " + "[/color]"+root.caller.studios
+                    text: f"[color={get_hex_from_color(self.theme_cls.primaryColor)}]"+"Studios: " + "[/color]"+root.caller.studios if root.caller else ""
                 SingleLineLabel:
                     font_style:"Label"
                     markup:True
                     role:"small"
-                    text: f"[color={get_hex_from_color(self.theme_cls.primaryColor)}]"+"Producers: " + "[/color]"+root.caller.producers
+                    text: f"[color={get_hex_from_color(self.theme_cls.primaryColor)}]"+"Producers: " + "[/color]"+root.caller.producers if root.caller else ""
                 SingleLineLabel:
                     font_style:"Label"
                     markup:True
                     role:"small"
-                    text: f"[color={get_hex_from_color(self.theme_cls.primaryColor)}]"+"Tags: "+"[/color]"+root.caller.tags
+                    text: f"[color={get_hex_from_color(self.theme_cls.primaryColor)}]"+"Tags: "+"[/color]"+root.caller.tags if root.caller else ""

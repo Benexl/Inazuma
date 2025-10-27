@@ -25,34 +25,7 @@ class MediaPopup(
     BackgroundColorBehavior,
     ModalView,
 ):
-    caller = ObjectProperty(
-        QueryDict(
-            {
-                "anime_id": "",
-                "title": "",
-                "is_play": "",
-                "trailer_url": "",
-                "episodes": "",
-                "favourites": "",
-                "popularity": "",
-                "media_status": "",
-                "is_in_my_list": False,
-                "is_in_my_notify": False,
-                "genres": "",
-                "first_aired_on": "",
-                "description": "",
-                "tags": "",
-                "studios": "",
-                "next_airing_episode": "",
-                "producers": "",
-                "stars": [0, 0, 0, 0, 0, 0],
-                "cover_image_url": "",
-                "preview_image": "",
-                "has_trailer_color": [0, 0, 0, 0],
-                "anilist_data": {},
-            }
-        )
-    )
+    caller = ObjectProperty()
 
     player = ObjectProperty()
 

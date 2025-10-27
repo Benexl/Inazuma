@@ -9,14 +9,24 @@
         bold:True 
         adaptive_height:True
         text:root.list_name
-    MDRecycleView:
-        id:container
-        key_viewclass:"viewclass"
-        key_size:"width"
-        RecycleBoxLayout:
+    MDScrollView:
+        do_scroll_y: False
+        MDBoxLayout:
+            id:container
             size_hint:None,1
             width:self.minimum_width
             default_size_hint:None, None
             default_size:dp(150),dp(100)
             spacing:"10dp"
             padding:"0dp","10dp","100dp","10dp"
+    # MDRecycleView:
+    #     id:container
+    #     key_viewclass:"viewclass"
+    #     key_size:"width"
+    #     RecycleBoxLayout:
+    #         size_hint:None,1
+    #         width:self.minimum_width
+    #         default_size_hint:None, None
+    #         default_size:dp(150),dp(100)
+    #         spacing:"10dp"
+    #         padding:"0dp","10dp","100dp","10dp"
