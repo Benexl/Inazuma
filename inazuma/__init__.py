@@ -5,6 +5,7 @@ from kivy.uix.screenmanager import FadeTransition, ScreenManager
 from kivy.uix.settings import SettingsWithSidebar
 from kivymd.app import MDApp
 from viu_media.core.config import AppConfig
+from viu_media.libs.provider.anime.types import Server
 
 from .View.components.media_card.media_card import MediaPopup
 from .View.screens import screens
@@ -75,7 +76,12 @@ class Inazuma(MDApp):
         )
 
     def play_on_external_player(
-        self, url: str, title: str, episode: str, media_item: "MediaItem"
+        self,
+        url: str,
+        title: str,
+        episode: str,
+        media_item: "MediaItem",
+        server: "Server",
     ):
         from viu_media.cli.service.player import PlayerService
         from viu_media.libs.player.params import PlayerParams
@@ -87,6 +93,7 @@ class Inazuma(MDApp):
                 title=title,
                 episode=episode,
                 query=media_item.title.romaji or media_item.title.english,
+                headers=server.headers,
             )
         )
 
