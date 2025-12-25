@@ -36,7 +36,7 @@ class HomeScreenController:
                 "data_getter": self.model.get_most_popular_anime,
             },
             {
-                "list_name": "Most Popular",
+                "list_name": "Recent",
                 "data_getter": self.model.get_most_recently_updated_anime,
             },
             {
