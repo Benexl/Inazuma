@@ -21,32 +21,37 @@ class AnimeScreenController:
     def get_view(self) -> AnimeScreenView:
         return self.view
 
-    # def fetch_streams(self, anilist_Data, is_dub=False, episode="1"):
-    #     if self.view.is_dub:
-    #         is_dub = self.view.is_dub.active
-    #         if anime_data := self.model.get_anime_data_from_provider(
-    #             anilist_Data, is_dub
-    #         ):
-    #             self.view.current_anime_data = anime_data
-    #     if current_servers := self.model.get_episode_streams(episode, is_dub):
-    #         Logger.debug(f"current servers {current_servers}")
-    #         self.view.current_servers = current_servers
-    #     else:
-    #         Logger.warning(f"No servers found for {anilist_Data['title']['romaji']}")
-    #     # TODO: add auto start
-    #     #
-    #     # self.view.current_link = self.view.current_links[0]["gogoanime"][0]
+    def fetch_streams(self, episode="1"):
+        # if self.view.is_dub:
+        #     is_dub = self.view.is_dub.active
+        #     if anime_data := self.model.get_anime_data_from_provider(
+        #         anilist_Data, is_dub
+        #     ):
+        #         self.view.current_anime_data = anime_data
+        if not self.model.current_state.provider_anime:
+            Logger.warning("No provider anime data available to fetch streams.")
+            return
 
-    def update_anime_view(
-        self, media_item:"MediaItem", caller_screen_name
-    ):
-        pass
-    #     self.fetch_streams(anilist_data)
-    #     self.view.current_anilist_data = anilist_data
-    #     self.view.current_title = (
-    #         anilist_data["title"]["english"] or anilist_data["title"]["romaji"]
-    #     )
-    #     self.view.caller_screen_name = caller_screen_name
+        if current_servers := self.model.get_episode_streams(episode):
+            Logger.debug(
+                f"current servers {[server.name for server in current_servers]}"
+            )
+            self.view.current_servers = current_servers
+        else:
+            Logger.warning(
+                f"No servers found for {self.model.current_state.provider_anime.title}"
+            )
+
+        # TODO: add auto start
+        #
+        # self.view.current_link = self.view.current_links[0]["gogoanime"][0]
+
+    def update_anime_view(self, media_item: "MediaItem", caller_screen_name):
+        self.model.get_anime_data_from_provider(media_item)
+        self.view.current_media_item = media_item
+        self.view.current_anime_data = self.model.current_state.provider_anime
+        self.view.current_title = media_item.title.romaji or media_item.title.english
+        self.view.caller_screen_name = caller_screen_name
 
 
 __all__ = ["AnimeScreenController"]

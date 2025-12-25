@@ -9,10 +9,22 @@ from kivy.logger import Logger
 from inazuma.core.viu import Viu
 
 from .base_model import BaseScreenModel
+from typing import TYPE_CHECKING
+from dataclasses import dataclass
 
+if TYPE_CHECKING:
+    from viu_media.libs.media_api.types import MediaItem
+    from viu_media.libs.provider.anime.types import Anime, Server, EpisodeStream
 Cache.register("streams.anime", limit=10)
 
 # anime_provider = create_provider(ProviderName.ALLANIME)
+
+
+@dataclass
+class CurrentState:
+    media_item: "MediaItem | None" = None
+    provider_anime: "Anime | None" = None
+    episode_stream: "EpisodeStream | None" = None
 
 
 class AnimeScreenModel(BaseScreenModel):
@@ -30,59 +42,88 @@ class AnimeScreenModel(BaseScreenModel):
     def __init__(self, viu: Viu) -> None:
         super().__init__()
         self.viu = viu
+        self.current_state = CurrentState()
 
-    # def get_anime_data_from_provider(
-    #     self, media_search_result: "MediaSearchResult", is_dub, id=None
-    # ):
-    #     try:
-    #         if (self.media_search_result or {"id": -1})["id"] == media_search_result[
-    #             "id"
-    #         ] and self.current_anime_data:
-    #             return self.current_anime_data
-    #         translation_type = "dub" if is_dub else "sub"
-    #         search_results = anime_provider.search_for_anime(
-    #             media_search_result["title"]["romaji"]
-    #             or media_search_result["title"]["english"],
-    #             translation_type,
-    #         )
+    def get_anime_data_from_provider(self, media_item: "MediaItem") -> "Anime | None":
+        from viu_media.libs.provider.anime.params import SearchParams, AnimeParams
+        from viu_media.cli.utils.search import find_best_match_title
 
-    #         if search_results:
-    #             _search_results = search_results["results"]
-    #             result = max(
-    #                 _search_results,
-    #                 key=lambda x: anime_title_percentage_match(
-    #                     x["title"], media_search_result
-    #                 ),
-    #             )
-    #             self.current_anilist_anime_id = media_search_result["id"]
-    #             self.current_provider_anime_id = result["id"]
-    #             self.current_anime_data = anime_provider.get_anime(result["id"])
-    #             if self.current_anime_data:
-    #                 Logger.debug(f"Got data of {self.current_anime_data['title']}")
-    #             return self.current_anime_data
-    #         return {}
-    #     except Exception as e:
-    #         Logger.info("anime_screen error: %s" % e)
-    #         return {}
+        try:
+            anime_provider = self.viu.anime_provider
+            # if (self.media_search_result or {"id": -1})["id"] == media_search_result[
+            #     "id"
+            # ] and self.current_anime_data:
+            #     return self.current_anime_data
 
-    # def get_episode_streams(self, episode, is_dub):
-    #     translation_type = "dub" if is_dub else "sub"
+            search_results = anime_provider.search(
+                SearchParams(
+                    query=media_item.title.romaji or media_item.title.english,
+                    translation_type=self.viu.config.stream.translation_type,
+                )
+            )
 
-    #     try:
-    #         if self.current_anime_data:
-    #             streams = anime_provider.get_episode_streams(
-    #                 self.current_provider_anime_id, episode, translation_type
-    #             )
-    #             if not streams:
-    #                 return []
-    #             return [episode_stream for episode_stream in streams]
+            if not search_results:
+                return
+            provider_results_map = {
+                result.title: result for result in search_results.results
+            }
+            result = find_best_match_title(
+                provider_results_map,
+                self.viu.config.general.provider,
+                media_item,
+            )
+            provider_anime = provider_results_map[result]
+            initial_state = self.current_state
+            self.current_state.provider_anime = (
+                anime_provider.get(
+                    AnimeParams(
+                        query=media_item.title.romaji or media_item.title.english,
+                        id=provider_anime.id,
+                    )
+                )
+                or initial_state.provider_anime
+            )
 
-    #         return []
-    #     except Exception as e:
-    #         Logger.error("anime_screen error: %s" % e)
-    #         return []
+            if (
+                initial_state.provider_anime != self.current_state.provider_anime
+                and self.current_state.provider_anime
+            ):
+                Logger.debug(
+                    f"Got data of {provider_anime.title} from {self.viu.config.general.provider} provider"
+                )
 
-    #     # should return {type:{provider:streamlink}}
+            self.current_state.media_item = media_item
+            return self.current_state.provider_anime
+        except Exception as e:
+            Logger.info("anime_screen error: %s" % e)
+            return
+
+    def get_episode_streams(self, episode: str) -> list["Server"]:
+        from viu_media.libs.provider.anime.params import EpisodeStreamsParams
+
+        try:
+            if not (
+                self.current_state.provider_anime and self.current_state.media_item
+            ):
+                return []
+
+            streams = self.viu.anime_provider.episode_streams(
+                EpisodeStreamsParams(
+                    query=self.current_state.media_item.title.romaji
+                    or self.current_state.media_item.title.english,
+                    anime_id=self.current_state.provider_anime.id,
+                    episode=episode,
+                )
+            )
+
+            if not streams:
+                return []
+
+            return [episode_stream for episode_stream in streams]
+
+        except Exception as e:
+            Logger.error("anime_screen error: %s" % e)
+            return []
 
     # def get_anime_data(self, id: int):
     #     return AniList.get_anime(id)

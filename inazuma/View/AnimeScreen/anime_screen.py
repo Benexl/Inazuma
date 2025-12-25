@@ -1,12 +1,16 @@
 import logging
 
-from viu_media.libs.media_api.types import MediaSearchResult
+from viu_media.libs.media_api.types import MediaItem
+from viu_media.libs.provider.anime.types import Server, Anime
 from kivy.properties import ListProperty, ObjectProperty, StringProperty
 from kivy.uix.widget import Factory
 from kivymd.uix.button import MDButton
 
 from ...View.base_screen import BaseScreenView
+from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from inazuma.Controller.anime_screen import AnimeScreenController
 logger = logging.getLogger((__name__))
 
 
@@ -21,10 +25,11 @@ Factory.register("EpisodeButton", cls=EpisodeButton)
 class AnimeScreenView(BaseScreenView):
     """The anime screen view"""
 
-    current_anilist_data: "MediaSearchResult | None" = None
+    controller: "AnimeScreenController"
+    current_media_item: "MediaItem | None" = None
     current_server = ObjectProperty()
     current_link = StringProperty()
-    current_servers = ListProperty([])
+    current_servers: "list[Server]" = ListProperty([])
     current_anime_data = ObjectProperty()
     caller_screen_name = ObjectProperty()
     current_title = ""
@@ -32,7 +37,7 @@ class AnimeScreenView(BaseScreenView):
     total_episodes = 0
     current_episode = 1
     video_player = ObjectProperty()
-    current_server_name = "dropbox"
+    current_server_name = "gogoanime"
     is_dub = ObjectProperty()
 
     def __init__(self, **kwargs):
@@ -63,34 +68,31 @@ class AnimeScreenView(BaseScreenView):
         if previous_episode > 0:
             self.update_current_episode(str(previous_episode))
 
-    def on_current_anime_data(self, instance, value):
-        self.update_episodes(value["availableEpisodesDetail"]["sub"][::-1])
+    def on_current_anime_data(self, instance, anime: "Anime"):
+        episodes = anime.episodes.sub if True else anime.episodes.dub
+        self.update_episodes(episodes)
         self.current_episode = int("1")
         self.update_current_video_stream(self.current_server_name)
         self.video_player.state = "play"
 
     def update_current_episode(self, episode):
         self.current_episode = int(episode)
-        self.controller.fetch_streams(
-            self.current_anilist_data, self.is_dub.active, episode
-        )
+        self.controller.fetch_streams(episode)
         self.update_current_video_stream(self.current_server_name)
         self.video_player.state = "play"
 
-    def update_current_video_stream(self, server_name, is_dub=False):
+    def update_current_video_stream(self, server_name: str):
         for server in self.current_servers:
-            if server["server"] == server_name:
+            if server.name == server_name:
                 self.current_server = server
-                self.current_server_name = server["server"]
-                self.current_link = server["links"][0]["link"]
+                self.current_server_name = server.name
+                self.current_link = server.links[0].link
                 self.video_player.state = "play"
                 logger.debug(f"found {self.current_server_name} server")
                 logger.debug(f"found {self.current_link} link")
                 break
             else:
-                logger.warning(
-                    f"Found {server['server']} server but {server_name} wanted"
-                )
+                logger.warning(f"Found {server.name} server but {server_name} wanted")
 
     def add_to_user_anime_list(self, *args):
         self.app.add_anime_to_user_anime_list(self.model.anime_id)

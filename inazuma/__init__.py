@@ -10,8 +10,10 @@ from .View.components.media_card.media_card import MediaPopup
 from .View.screens import screens
 
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from viu_media.libs.media_api.types import MediaItem
+
 
 class Inazuma(MDApp):
     default_anime_image = resource_find(random.choice(["default_1.jpg", "default.jpg"]))
@@ -66,23 +68,41 @@ class Inazuma(MDApp):
     #         self.manager_screens.current = "search screen"
     #     self.search_screen.handle_search_for_anime(search_field, **kwargs)
     #
-    def show_anime_screen(self, media_item:"MediaItem", caller_screen_name: str):
+    def show_anime_screen(self, media_item: "MediaItem", caller_screen_name: str):
         self.manager_screens.current = anime_screen_name = "anime screen"
-        self.manager_screens.get_screen(anime_screen_name).controller.update_anime_view(media_item, caller_screen_name)
+        self.manager_screens.get_screen(anime_screen_name).controller.update_anime_view(
+            media_item, caller_screen_name
+        )
+
+    def play_on_external_player(
+        self, url: str, title: str, episode: str, media_item: "MediaItem"
+    ):
+        from viu_media.cli.service.player import PlayerService
+        from viu_media.libs.player.params import PlayerParams
+
+        player_service = PlayerService(self.viu.config, self.viu.anime_provider)
+        player_service.play(
+            PlayerParams(
+                url=url,
+                title=title,
+                episode=episode,
+                query=media_item.title.romaji or media_item.title.english,
+            )
+        )
 
     #
     # def download_anime_video(self, url: str, anime_title, anime_server):
     #     pass
-        # from viu_media.cli.service.download import DownloadService
-        #
-        # from .Utility.show_notification import show_notification
-        #
-        # self.download_screen.new_download_task(anime_title)
-        # show_notification("New Download", f"{anime_title[0]} episode: {anime_title[1]}")
-        # progress_hook = self.download_screen.on_episode_download_progress
-        # downloader.download_file(
-        #     url, anime_title, anime_server["episode_title"], USER_VIDEOS_DIR
-        # )
+    # from viu_media.cli.service.download import DownloadService
+    #
+    # from .Utility.show_notification import show_notification
+    #
+    # self.download_screen.new_download_task(anime_title)
+    # show_notification("New Download", f"{anime_title[0]} episode: {anime_title[1]}")
+    # progress_hook = self.download_screen.on_episode_download_progress
+    # downloader.download_file(
+    #     url, anime_title, anime_server["episode_title"], USER_VIDEOS_DIR
+    # )
 
     #
     # def build_config(self, config):
