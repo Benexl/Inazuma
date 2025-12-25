@@ -9,6 +9,9 @@ from viu_media.core.config import AppConfig
 from .View.components.media_card.media_card import MediaPopup
 from .View.screens import screens
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from viu_media.libs.media_api.types import MediaItem
 
 class Inazuma(MDApp):
     default_anime_image = resource_find(random.choice(["default_1.jpg", "default.jpg"]))
@@ -63,13 +66,13 @@ class Inazuma(MDApp):
     #         self.manager_screens.current = "search screen"
     #     self.search_screen.handle_search_for_anime(search_field, **kwargs)
     #
-    # def show_anime_screen(self, anilist_data, caller_screen_name: str):
-    #     self.manager_screens.current = "anime screen"
-    #     self.anime_screen.controller.update_anime_view(anilist_data, caller_screen_name)
+    def show_anime_screen(self, media_item:"MediaItem", caller_screen_name: str):
+        self.manager_screens.current = anime_screen_name = "anime screen"
+        self.manager_screens.get_screen(anime_screen_name).controller.update_anime_view(media_item, caller_screen_name)
 
     #
-    def download_anime_video(self, url: str, anime_title, anime_server):
-        pass
+    # def download_anime_video(self, url: str, anime_title, anime_server):
+    #     pass
         # from viu_media.cli.service.download import DownloadService
         #
         # from .Utility.show_notification import show_notification

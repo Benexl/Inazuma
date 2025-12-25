@@ -42,9 +42,10 @@ class MediaCard(HoverBehavior, MDBoxLayout):
     _popup_opened = False
     _title = ()
 
-    def __init__(self, media_item: MediaItem, **kwargs):
+    def __init__(self, media_item: MediaItem, screen,**kwargs):
         super().__init__(**kwargs)
         self.media_item = media_item
+        self.screen = screen
         self.anime_id = media_item.id
         self.title = media_item.title.english
         self.episodes = str(media_item.episodes)

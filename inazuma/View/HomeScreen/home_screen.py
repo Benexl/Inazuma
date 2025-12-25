@@ -14,7 +14,7 @@ class HomeScreenView(BaseScreenView):
         cards_container = MediaCardsContainer()
         cards_container.list_name = list_name.upper()
         for anime in anime_list.media:
-            card = MediaCard(anime)
+            card = MediaCard(anime,self)
             cards_container.container.add_widget(card)
         self.main_container.add_widget(cards_container)
 
