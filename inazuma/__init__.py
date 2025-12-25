@@ -85,17 +85,23 @@ class Inazuma(MDApp):
     ):
         from viu_media.cli.service.player import PlayerService
         from viu_media.libs.player.params import PlayerParams
+        from threading import Thread
 
         player_service = PlayerService(self.viu.config, self.viu.anime_provider)
-        player_service.play(
-            PlayerParams(
-                url=url,
-                title=title,
-                episode=episode,
-                query=media_item.title.romaji or media_item.title.english,
-                headers=server.headers,
-            )
+        player_thread = Thread(
+            target=player_service.play,
+            args=(
+                PlayerParams(
+                    url=url,
+                    title=title,
+                    episode=episode,
+                    query=media_item.title.romaji or media_item.title.english,
+                    headers=server.headers,
+                ),
+            ),
+            daemon=True,
         )
+        player_thread.start()
 
     #
     # def download_anime_video(self, url: str, anime_title, anime_server):

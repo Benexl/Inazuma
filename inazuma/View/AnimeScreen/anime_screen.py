@@ -37,7 +37,7 @@ class AnimeScreenView(BaseScreenView):
     total_episodes = 0
     current_episode = 1
     video_player = ObjectProperty()
-    current_server_name = "gogoanime"
+    current_server_name = "sharepoint"
     is_dub = ObjectProperty()
 
     def __init__(self, **kwargs):

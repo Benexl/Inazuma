@@ -54,7 +54,7 @@
                     on_press: 
                         if root.current_link: app.play_on_external_player(root.current_link, root.current_title, root.current_episode, root.current_media_item,root.current_server)
                     MDButtonText:
-                        text:"Play on MPV"
+                        text:"Play on external player"
                 AnimeLabel:
                     text:"Dub: "
                     padding: "10dp"
@@ -76,10 +76,10 @@
                     MDSegmentedButtonItem:
                         id:dropbox
                         on_active:
-                            root.update_current_video_stream("dropbox")
+                            root.update_current_video_stream("kwik")
                             pl.selected_segments = [self]
                         MDSegmentButtonLabel:
-                            text:"DropBox"
+                            text:"Kwik"
                     MDSegmentedButtonItem:
                         on_active:
                             root.update_current_video_stream("sharepoint")
