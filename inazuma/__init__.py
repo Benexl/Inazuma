@@ -108,10 +108,6 @@ class Inazuma(MDApp):
             if theme_style := config.get("Preferences", "theme_style"):
                 self.theme_cls.theme_style = theme_style
 
-        # self.anime_screen = self.manager_screens.get_screen("anime screen")
-        # self.search_screen = self.manager_screens.get_screen("search screen")
-        # self.download_screen = self.manager_screens.get_screen("downloads screen")
-        self.home_screen = self.manager_screens.get_screen("home screen")
         return self.manager_screens
 
     def on_start(self, *args):
@@ -305,8 +301,6 @@ class Inazuma(MDApp):
 
     def _apply_viu_config_change(self, key: str, value):
         """Apply a config change to viu.config dynamically."""
-        from enum import Enum
-        from pathlib import Path
 
         # Key format is "{section_name}_{field_name}"
         parts = key.split("_", 1)
