@@ -46,8 +46,14 @@ class MediaCard(HoverBehavior, MDBoxLayout):
     _popup_opened = False
     _title = ()
 
-    def __init__(self, media_item: "MediaItem", screen, **kwargs):
+    def __init__(self, media_item: "MediaItem | None"=None, screen=None, **kwargs):
         super().__init__(**kwargs)
+
+        self.orientation = "vertical"
+        self.app: MDApp | None = MDApp.get_running_app()
+        self.adaptive_size = True
+        if media_item is None or screen is None:
+            return
         self.media_item = media_item
         self.screen = screen
         self.anime_id = media_item.id
@@ -66,9 +72,6 @@ class MediaCard(HoverBehavior, MDBoxLayout):
         )
         self.tags = ", ".join([tag.name.value for tag in media_item.tags])
 
-        self.orientation = "vertical"
-        self.app: MDApp | None = MDApp.get_running_app()
-        self.adaptive_size = True
 
     def on_touch_down(self, touch):
         if touch.is_mouse_scrolling:

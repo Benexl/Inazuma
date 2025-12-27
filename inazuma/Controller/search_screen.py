@@ -1,4 +1,4 @@
-from inspect import isgenerator
+from threading import Thread
 
 from kivy.clock import Clock
 from kivy.logger import Logger
@@ -9,6 +9,8 @@ from ..View.SearchScreen.search_screen import SearchScreenView
 
 class SearchScreenController:
     """The search screen controller"""
+    is_searching = False
+    search_term = ""
 
     def __init__(self, model: SearchScreenModel):
         self.model = model
@@ -16,33 +18,40 @@ class SearchScreenController:
 
     def get_view(self) -> SearchScreenView:
         return self.view
-
-    def update_trending_anime(self):
-        """Gets and adds the trending anime to the search screen"""
-        trending_cards_generator = self.model.get_trending_anime()
-        if isgenerator(trending_cards_generator):
-            # self.view.trending_anime_sidebar.data = []
-            for card in trending_cards_generator:
-                card["screen"] = self.view
-                # card["pos_hint"] = {"center_x": 0.5}
-                self.view.update_trending_sidebar(card)
+    
+    def handle_search_for_anime(self, search_widget=None, page=None):
+        if search_widget:
+            search_term = search_widget.text
+        elif page:
+            search_term = self.search_term
         else:
-            Logger.error("Home Screen:Failed to load trending anime")
+            return
 
-    def requested_search_for_anime(self, anime_title, **kwargs):
-        self.view.is_searching = True
-        search_Results = self.model.search_for_anime(anime_title, **kwargs)
-        if isgenerator(search_Results):
-            for result_card in search_Results:
-                result_card["screen"] = self.view
-                self.view.update_layout(result_card)
-            Clock.schedule_once(
-                lambda _: self.view.update_pagination(self.model.pagination_info)
-            )
-            self.update_trending_anime()
-        else:
-            Logger.error(f"Home Screen:Failed to search for {anime_title}")
-        self.view.is_searching = False
+        if search_term and not (self.is_searching):
+            self.search_term = search_term
+            filters = self.view.filters.filters
+            filters["page"] = page if page else 1
+            Thread(target=self._process_search, args=(search_term, filters)).start()
+
+
+    def add_or_update_trending(self):
+        Thread(target=self._process_trending).start()
+
+    def _process_search(self, anime_title, filters={}):
+        media_list = self.model.search_for_anime(anime_title, filters)
+        if not media_list:
+            Logger.error(f"Search Screen:Failed to search for {anime_title}")
+            return
+        Clock.schedule_once(
+            lambda dt: self.view.add_or_update_search_results(media_list)
+        )
+
+    def _process_trending(self):
+        media_list = self.model.get_trending()
+        if not media_list:
+            Logger.error("Search Screen:Failed to get trending anime")
+            return
+        Clock.schedule_once(lambda dt: self.view.add_or_update_trending(media_list))
 
 
 __all__ = ["SearchScreenController"]

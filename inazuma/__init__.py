@@ -66,11 +66,12 @@ class Inazuma(MDApp):
             view.name = name_screen
             self.manager_screens.add_widget(view)
 
-    # def search_for_anime(self, search_field, **kwargs):
-    #     if self.manager_screens.current != "search screen":
-    #         self.manager_screens.current = "search screen"
-    #     self.search_screen.handle_search_for_anime(search_field, **kwargs)
-    #
+    def search_for_anime(self, search_field, **kwargs):
+        if self.manager_screens.current != "search screen":
+            self.manager_screens.current = "search screen"
+        search_screen = self.manager_screens.get_screen("search screen")
+        search_screen.controller.handle_search_for_anime(search_field, **kwargs)
+    
     def show_anime_screen(self, media_item: "MediaItem", caller_screen_name: str):
         self.manager_screens.current = anime_screen_name = "anime screen"
         self.manager_screens.get_screen(anime_screen_name).controller.update_anime_view(

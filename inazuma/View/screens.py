@@ -1,14 +1,17 @@
-from ..Controller.anime_screen import AnimeScreenController
-# from ..Controller.downloads_screen import DownloadsScreenController
-from ..Controller.home_screen import HomeScreenController
-from ..Model.home_screen import HomeScreenModel
+from inazuma.Controller.anime_screen import AnimeScreenController
 
-# from ..Controller.my_list_screen import MyListScreenController
-# from ..Controller.search_screen import SearchScreenController
-from ..Model.anime_screen import AnimeScreenModel
-# from ..Model.download_screen import DownloadsScreenModel
-# from ..Model.my_list_screen import MyListScreenModel
-# from ..Model.search_screen import SearchScreenModel
+# from inazuma.Controller.downloads_screen import DownloadsScreenController
+from inazuma.Controller.home_screen import HomeScreenController
+from inazuma.Model.home_screen import HomeScreenModel
+
+# from inazuma.Controller.my_list_screen import MyListScreenController
+from inazuma.Controller.search_screen import SearchScreenController
+from inazuma.Model.anime_screen import AnimeScreenModel
+
+# from inazuma.Model.download_screen import DownloadsScreenModel
+# from inazuma.Model.my_list_screen import MyListScreenModel
+from inazuma.Model.search_screen import SearchScreenModel
+
 
 screens = {
     "home screen": {
@@ -19,10 +22,10 @@ screens = {
         "model": AnimeScreenModel,
         "controller": AnimeScreenController,
     },
-    # "search screen": {
-    #     "model": SearchScreenModel,
-    #     "controller": SearchScreenController,
-    # },
+    "search screen": {
+        "model": SearchScreenModel,
+        "controller": SearchScreenController,
+    },
     # "my list screen": {
     #     "model": MyListScreenModel,
     #     "controller": MyListScreenController,
