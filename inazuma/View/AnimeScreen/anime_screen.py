@@ -59,7 +59,7 @@ class AnimeScreenView(BaseScreenView):
             )
 
     def next_episode(self):
-        next_episode = self.current_episode + 1
+        next_episode = int(self.current_episode + 1)
         if next_episode <= self.total_episodes:
             self.update_current_episode(str(next_episode))
 
@@ -71,12 +71,12 @@ class AnimeScreenView(BaseScreenView):
     def on_current_anime_data(self, instance, anime: "Anime"):
         episodes = anime.episodes.sub if True else anime.episodes.dub
         self.update_episodes(episodes)
-        self.current_episode = int("1")
+        self.current_episode = float("1")
         self.update_current_video_stream(self.current_server_name)
         self.video_player.state = "play"
 
     def update_current_episode(self, episode):
-        self.current_episode = int(episode)
+        self.current_episode = float(episode)
         self.controller.fetch_streams(episode)
         self.update_current_video_stream(self.current_server_name)
         self.video_player.state = "play"
