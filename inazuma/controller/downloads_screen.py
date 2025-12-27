@@ -41,15 +41,64 @@ class DownloadsScreenController:
         speed = (
             format_bytes_to_human(data.get("speed", 0)) if data.get("speed") else "0 B"
         )
-        progress_text = f"Downloading: {data.get('filename', 'unknown')} ({format_bytes_to_human(data.get('downloaded_bytes', 0)) if data.get('downloaded_bytes') else '0 B'}/{format_bytes_to_human(data.get('total_bytes', 0)) if data.get('total_bytes') else '0 B'})\nElapsed: {round(data.get('elapsed', 0)) if data.get('elapsed') else 0}s ETA: {data.get('eta', 0) if data.get('eta') else 0}s Speed: {speed}/s"
-
-        # Update overall progress bar
-        self.view.update_download_progress(percentage_completion, progress_text)
+        downloaded = (
+            format_bytes_to_human(data.get("downloaded_bytes", 0))
+            if data.get("downloaded_bytes")
+            else "0 B"
+        )
+        total = (
+            format_bytes_to_human(data.get("total_bytes", 0))
+            if data.get("total_bytes")
+            else "0 B"
+        )
+        eta = data.get("eta", 0) if data.get("eta") else 0
+        progress_text = f"{downloaded}/{total} • {speed}/s • ETA: {eta}s"
 
         # Update specific task card if it exists
         if task_id in self.task_cards:
             task_card = self.task_cards[task_id]
             task_card.update_progress(percentage_completion, progress_text)
+
+        # Update overall progress bar with aggregate stats
+        self._update_overall_progress()
+
+    def _update_overall_progress(self):
+        """Calculate and update overall download progress across all tasks"""
+        if not self.task_cards:
+            self.view.update_download_progress(0, "No active downloads")
+            return
+
+        total_progress = 0
+        completed_count = 0
+        error_count = 0
+        downloading_count = 0
+
+        for task_card in self.task_cards.values():
+            total_progress += task_card.progress
+            if task_card.status == "completed":
+                completed_count += 1
+            elif task_card.status == "error":
+                error_count += 1
+            elif task_card.status == "downloading":
+                downloading_count += 1
+
+        avg_progress = round(total_progress / len(self.task_cards))
+        total_tasks = len(self.task_cards)
+
+        status_parts = []
+        if downloading_count > 0:
+            status_parts.append(f"{downloading_count} downloading")
+        if completed_count > 0:
+            status_parts.append(f"{completed_count} completed")
+        if error_count > 0:
+            status_parts.append(f"{error_count} failed")
+
+        status_text = " • ".join(status_parts) if status_parts else "Idle"
+        progress_text = (
+            f"Overall: {status_text} ({completed_count}/{total_tasks} tasks)"
+        )
+
+        self.view.update_download_progress(avg_progress, progress_text)
 
     def on_download_complete(self, task_id: str, result):
         """Handle download completion for a specific task"""
@@ -60,6 +109,9 @@ class DownloadsScreenController:
         # Update model
         self.model.on_download_complete(task_id, result)
 
+        # Update overall progress
+        self._update_overall_progress()
+
     def on_download_error(self, task_id: str, error_message: str):
         """Handle download error for a specific task"""
         if task_id in self.task_cards:
@@ -68,6 +120,9 @@ class DownloadsScreenController:
 
         # Update model
         self.model.on_download_error(task_id, error_message)
+
+        # Update overall progress
+        self._update_overall_progress()
 
 
 __all__ = ["DownloadsScreenController"]

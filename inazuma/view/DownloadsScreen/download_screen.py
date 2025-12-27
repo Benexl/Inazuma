@@ -21,8 +21,13 @@ class DownloadsScreenView(BaseScreenView):
         return task_card
 
     def update_download_progress(self, percentage_completion: int, progress_text: str):
-        self.progress_bar.value = percentage_completion
-        self.download_progress_label.text = progress_text
+        """Update the overall download progress (thread-safe)"""
+
+        def _update(dt):
+            self.progress_bar.value = percentage_completion
+            self.download_progress_label.text = progress_text
+
+        Clock.schedule_once(_update)
 
     def update_layout(self, widget):
         self.user_anime_list_container.add_widget(widget)

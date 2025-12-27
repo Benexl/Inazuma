@@ -1,4 +1,5 @@
 #:import color_text inazuma.utility.kivy_markup_helper.color_text
+#:import get_color_from_hex kivy.utils.get_color_from_hex
 
 <TaskText@MDLabel>:
     adaptive_height:True
@@ -9,15 +10,77 @@
     role: "large"
     bold:True
 
+<TaskProgressText@MDLabel>:
+    adaptive_height:True
+    max_lines:2
+    shorten:True
+    font_style: "Label"
+    role: "small"
+    theme_text_color: "Secondary"
 
 <TaskCard>:
     adaptive_height:True
-    radius:8
-    padding:"20dp"
-    md_bg_color:self.theme_cls.surfaceContainerHighColor
+    radius:12
+    padding:"16dp"
+    spacing:"12dp"
+    md_bg_color:self.theme_cls.surfaceContainerHighColor if root.status != "completed" else self.theme_cls.surfaceContainerColor
+    orientation:"vertical"
 
-    TaskText:
-        size_hint_x:.8
-        text: root.media_item.title.english + f"; Episode {root.episode}"
+    MDBoxLayout:
+        adaptive_height:True
+        spacing:"12dp"
+        
+        # Status Icon
+        MDIcon:
+            size_hint_x:None
+            width:"32dp"
+            pos_hint:{"center_y":.5}
+            icon: "check-circle" if root.status == "completed" else ("alert-circle" if root.status == "error" else "download")
+            theme_icon_color:"Custom"
+            icon_color: get_color_from_hex("#4CAF50") if root.status == "completed" else (self.theme_cls.errorColor if root.status == "error" else self.theme_cls.primaryColor)
+        
+        # Title and Episode
+        MDBoxLayout:
+            orientation:"vertical"
+            adaptive_height:True
+            spacing:"4dp"
+            
+            TaskText:
+                text: root.media_item.title.english if root.media_item.title.english else root.media_item.title.romaji
+                
+            TaskProgressText:
+                text: f"Episode {root.episode}"
+                theme_text_color:"Primary" if root.status == "downloading" else "Secondary"
+    
+    # Progress section (only visible when downloading)
+    MDBoxLayout:
+        adaptive_height:True
+        spacing:"8dp"
+        opacity: 1 if root.status == "downloading" else 0
+        disabled: root.status != "downloading"
+        
+        MDLinearProgressIndicator:
+            size_hint_x:1
+            size_hint_y:None
+            height:"6dp"
+            type: "determinate"
+            value: root.progress
+            pos_hint: {'center_y': .5}
+        
+        MDLabel:
+            size_hint_x:None
+            width:"60dp"
+            text: f"{int(root.progress)}%"
+            font_style: "Label"
+            role: "small"
+            bold:True
+            halign:"right"
+            pos_hint: {'center_y': .5}
+    
+    # Progress text (visible when downloading or on error)
+    TaskProgressText:
+        text: root.progress_text
+        opacity: 1 if root.status != "completed" else 0
+        disabled: root.status == "completed"
     
 

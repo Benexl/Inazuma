@@ -40,19 +40,27 @@
                                 icon:"clock"
                 MDBoxLayout:
                     size_hint_y:None
-                    height:"40dp"
-                    spacing:"10dp"
-                    padding:"10dp"
-                    md_bg_color:self.theme_cls.secondaryContainerColor
-                    DownloadsScreenLabel:
-                        id:download_progress_label
-                        size_hint_x: .8
-                        text:"Try Downloading sth :)"
+                    height:"50dp"
+                    spacing:"16dp"
+                    padding:"16dp"
+                    md_bg_color:self.theme_cls.surfaceContainerHighestColor
+                    MDIcon:
+                        size_hint_x:None
+                        width:"24dp"
+                        icon:"progress-download"
                         pos_hint: {'center_y': .5}
-                    MDLinearProgressIndicator:
-                        id: progress_bar
-                        size_hint_x: .2
-                        size_hint_y:None
-                        height:"10dp"
-                        type: "determinate"
-                        pos_hint: {'center_y': .5}
+                        theme_icon_color:"Custom"
+                        icon_color:self.theme_cls.primaryColor
+                    MDBoxLayout:
+                        orientation:"vertical"
+                        spacing:"4dp"
+                        DownloadsScreenLabel:
+                            id:download_progress_label
+                            text:"Try Downloading something :)"
+                            theme_text_color:"Primary"
+                        MDLinearProgressIndicator:
+                            id: progress_bar
+                            size_hint_y:None
+                            height:"4dp"
+                            type: "determinate"
+                            value:0

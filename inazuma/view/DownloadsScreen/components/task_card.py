@@ -4,6 +4,7 @@ from kivy.properties import (
     ObjectProperty,
     NumericProperty,
 )
+from kivy.clock import Clock
 from kivymd.uix.boxlayout import MDBoxLayout
 
 from typing import TYPE_CHECKING
@@ -33,17 +34,29 @@ class TaskCard(MDBoxLayout):
         self.status = "downloading"
 
     def update_progress(self, percentage: int, text: str):
-        """Update the progress of this task"""
-        self.progress = percentage
-        self.progress_text = text
+        """Update the progress of this task (thread-safe)"""
+
+        def _update(dt):
+            self.progress = percentage
+            self.progress_text = text
+
+        Clock.schedule_once(_update)
 
     def mark_complete(self, result=None):
-        """Mark this task as completed"""
-        self.status = "completed"
-        self.progress = 100
-        self.progress_text = f"Download complete: {self.media_item.title.english or self.media_item.title.romaji} - Episode {self.episode}"
+        """Mark this task as completed (thread-safe)"""
+
+        def _complete(dt):
+            self.status = "completed"
+            self.progress = 100
+            self.progress_text = f"Completed successfully"
+
+        Clock.schedule_once(_complete)
 
     def mark_error(self, error_message: str):
-        """Mark this task as failed"""
-        self.status = "error"
-        self.progress_text = f"Error: {error_message}"
+        """Mark this task as failed (thread-safe)"""
+
+        def _error(dt):
+            self.status = "error"
+            self.progress_text = f"Error: {error_message}"
+
+        Clock.schedule_once(_error)
