@@ -9,6 +9,7 @@ from ..view.SearchScreen.search_screen import SearchScreenView
 
 class SearchScreenController:
     """The search screen controller"""
+
     is_searching = False
     search_term = ""
 
@@ -36,7 +37,6 @@ class SearchScreenController:
     def apply_filters(self):
         """Apply filters and search with current search term."""
         self.handle_search_for_anime(page=1)
-
 
     def add_or_update_trending(self):
         Thread(target=self._process_trending).start()
