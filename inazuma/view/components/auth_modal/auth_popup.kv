@@ -1,0 +1,185 @@
+#:import get_hex_from_color kivy.utils.get_hex_from_color
+
+<AuthPopup>:
+    size_hint: None, None
+    height: dp(400)
+    width: dp(380)
+    radius: [10, 10, 10, 10]
+    md_bg_color: self.theme_cls.backgroundColor
+    token_input: token_field
+
+    MDBoxLayout:
+        orientation: 'vertical'
+        padding: "20dp"
+        spacing: "15dp"
+
+        # Header
+        MDBoxLayout:
+            adaptive_height: True
+            spacing: "10dp"
+
+            MDIcon:
+                icon: "account-circle"
+                font_size: "48sp"
+                pos_hint: {'center_y': 0.5}
+                theme_text_color: "Custom"
+                text_color: self.theme_cls.primaryColor
+
+            MDBoxLayout:
+                orientation: 'vertical'
+                adaptive_height: True
+                pos_hint: {'center_y': 0.5}
+
+                MDLabel:
+                    text: "AniList Account"
+                    font_style: "Title"
+                    role: "medium"
+                    bold: True
+                    adaptive_height: True
+
+                MDLabel:
+                    text: root.status_message
+                    font_style: "Label"
+                    role: "medium"
+                    adaptive_height: True
+                    theme_text_color: "Custom"
+                    text_color: self.theme_cls.primaryColor if root.is_logged_in else self.theme_cls.onSurfaceVariantColor
+
+        MDDivider:
+
+        # Content - changes based on login state
+        MDBoxLayout:
+            orientation: 'vertical'
+            spacing: "15dp"
+
+            # Logged in view
+            MDBoxLayout:
+                orientation: 'vertical'
+                spacing: "10dp"
+                opacity: 1 if root.is_logged_in else 0
+                disabled: not root.is_logged_in
+                size_hint_y: None
+                height: self.minimum_height if root.is_logged_in else 0
+
+                MDBoxLayout:
+                    adaptive_height: True
+                    spacing: "10dp"
+                    padding: "10dp"
+                    md_bg_color: self.theme_cls.surfaceContainerHighColor
+                    radius: [8, 8, 8, 8]
+
+                    MDIcon:
+                        icon: "check-circle"
+                        theme_text_color: "Custom"
+                        text_color: 0, 0.8, 0.4, 1
+                        pos_hint: {'center_y': 0.5}
+
+                    MDLabel:
+                        text: f"Connected as [b]{root.username}[/b]"
+                        markup: True
+                        adaptive_height: True
+                        pos_hint: {'center_y': 0.5}
+
+                MDLabel:
+                    text: "Your watch progress and lists are synced with AniList."
+                    font_style: "Body"
+                    role: "small"
+                    adaptive_height: True
+                    theme_text_color: "Custom"
+                    text_color: self.theme_cls.onSurfaceVariantColor
+
+            # Not logged in view
+            MDBoxLayout:
+                orientation: 'vertical'
+                spacing: "15dp"
+                opacity: 0 if root.is_logged_in else 1
+                disabled: root.is_logged_in
+                size_hint_y: None
+                height: self.minimum_height if not root.is_logged_in else 0
+
+                MDLabel:
+                    text: "Connect your AniList account to sync your watch progress and manage your anime lists."
+                    font_style: "Body"
+                    role: "small"
+                    adaptive_height: True
+                    theme_text_color: "Custom"
+                    text_color: self.theme_cls.onSurfaceVariantColor
+
+                MDButton:
+                    style: "elevated"
+                    on_release: root.open_anilist_auth()
+                    pos_hint: {'center_x': 0.5}
+                    disabled: root.is_loading
+
+                    MDButtonIcon:
+                        icon: "open-in-new"
+
+                    MDButtonText:
+                        text: "Open AniList to Authorize"
+
+                MDTextField:
+                    id: token_field
+                    mode: "outlined"
+                    size_hint_x: 1
+                    disabled: root.is_loading
+
+                    MDTextFieldHintText:
+                        text: "Paste your access token here"
+
+                    MDTextFieldHelperText:
+                        text: "Copy the token from the URL after authorizing"
+                        mode: "persistent"
+
+                MDButton:
+                    style: "filled"
+                    on_release: root.login_with_token(token_field.text)
+                    pos_hint: {'center_x': 0.5}
+                    disabled: root.is_loading or not token_field.text
+
+                    MDButtonIcon:
+                        icon: "login"
+
+                    MDButtonText:
+                        text: "Login"
+
+        # Spacer
+        Widget:
+
+        # Footer buttons
+        MDBoxLayout:
+            adaptive_height: True
+            spacing: "10dp"
+
+            MDButton:
+                style: "text"
+                on_release: root.dismiss()
+
+                MDButtonText:
+                    text: "Close"
+
+            Widget:
+
+            # Loading indicator
+            MDCircularProgressIndicator:
+                size_hint: None, None
+                size: dp(24), dp(24)
+                pos_hint: {'center_y': 0.5}
+                opacity: 1 if root.is_loading else 0
+
+            MDButton:
+                style: "outlined"
+                theme_bg_color: "Custom"
+                md_bg_color: 1, 0.3, 0.3, 0.1
+                on_release: root.logout()
+                opacity: 1 if root.is_logged_in else 0
+                disabled: not root.is_logged_in or root.is_loading
+
+                MDButtonIcon:
+                    icon: "logout"
+                    theme_icon_color: "Custom"
+                    icon_color: 1, 0.4, 0.4, 1
+
+                MDButtonText:
+                    text: "Logout"
+                    theme_text_color: "Custom"
+                    text_color: 1, 0.4, 0.4, 1

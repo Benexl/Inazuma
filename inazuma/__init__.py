@@ -8,6 +8,7 @@ from kivy.uix.settings import SettingsWithSidebar
 from kivymd.app import MDApp
 from inazuma.view.screens import screens
 from inazuma.view.components.media_card.media_card import MediaPopup
+from inazuma.view.components.auth_modal import AuthPopup
 from kivy.logger import Logger
 from inazuma.utility.data import themes_available
 from typing import TYPE_CHECKING
@@ -115,6 +116,7 @@ class Inazuma(MDApp):
 
     def on_start(self, *args):
         self.media_card_popup = MediaPopup()
+        self.auth_popup = AuthPopup()
 
     def build_config(self, config):
         # General settings setup

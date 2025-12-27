@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from viu_media.cli.service.player import PlayerService
     from viu_media.core.downloader.base import BaseDownloader
     from viu_media.libs.player.base import BasePlayer
+    from viu_media.cli.service.auth import AuthService
 
 
 @dataclass
@@ -17,6 +18,7 @@ class Viu:
     config: "AppConfig"
     _media_api: "BaseApiClient | None" = None
     _anime_provider: "BaseAnimeProvider | None" = None
+    _auth: "AuthService | None" = None
     _registry_service: "MediaRegistryService | None" = None
     _player: "BasePlayer | None" = None
     _player_service: "PlayerService | None" = None
@@ -40,6 +42,11 @@ class Viu:
             self._media_api = create_api_client(
                 self.config.general.media_api, self.config
             )
+            # authenticate if we have credentials
+            auth_service = self.auth
+            auth_profile = auth_service.get_auth()
+            if auth_profile:
+                self._media_api.authenticate(auth_profile.token)
         return self._media_api
 
     @property
@@ -49,6 +56,14 @@ class Viu:
 
             self._anime_provider = create_provider(self.config.general.provider)
         return self._anime_provider
+
+    @property
+    def auth(self) -> "AuthService":
+        if not self._auth:
+            from viu_media.cli.service.auth import AuthService
+
+            self._auth = AuthService(self.config.general.media_api)
+        return self._auth
 
     @property
     def player(self) -> "BasePlayer":
