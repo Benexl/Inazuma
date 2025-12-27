@@ -2,26 +2,120 @@
     MDDropDownItemText:
         text: root.text
 
+<FilterItem@MDBoxLayout>:
+    orientation: "vertical"
+    adaptive_height: True
+    adaptive_width: True
+    spacing: "4dp"
+
 <FilterLabel@MDLabel>:
-    adaptive_width:True
+    adaptive_width: True
+    font_style: "Label"
+    role: "small"
+    theme_text_color: "Secondary"
 
 <Filters>:
-    adaptive_height:True
-    spacing:"10dp"
-    size_hint_x:.95
-    pos_hint:{"center_x":.5}
-    padding:"10dp"
-    md_bg_color:self.theme_cls.surfaceContainerLowColor
+    orientation: "vertical"
+    adaptive_height: True
+    size_hint_x: .95
+    pos_hint: {"center_x": .5}
+    spacing: "8dp"
 
-    FilterLabel:
-        text:"Sort By"
-    FilterDropDown:
-        id:sort_filter
-        text:root.filters["sort"]
-        on_release: root.open_filter_menu(self,"sort")
-    FilterLabel:
-        text:"Status"
-    FilterDropDown:
-        id:status_filter
-        text:root.filters["status"]
-        on_release: root.open_filter_menu(self,"status")
+    # Filter header with title and action buttons
+    MDBoxLayout:
+        adaptive_height: True
+        spacing: "8dp"
+        padding: "12dp", "8dp"
+        md_bg_color: self.theme_cls.surfaceContainerColor
+        radius: [8, 8, 0, 0]
+
+        MDIcon:
+            icon: "filter-variant"
+            adaptive_size: True
+            pos_hint: {"center_y": .5}
+
+        MDLabel:
+            text: "Filters"
+            adaptive_width: True
+            bold: True
+            pos_hint: {"center_y": .5}
+
+        Widget:
+
+        MDButton:
+            style: "text"
+            on_release: root.reset_filters()
+            MDButtonText:
+                text: "Reset"
+
+        MDButton:
+            style: "filled"
+            on_release: root.apply_filters()
+            MDButtonIcon:
+                icon: "magnify"
+            MDButtonText:
+                text: "Apply"
+
+    # Filter chips row
+    MDBoxLayout:
+        adaptive_height: True
+        spacing: "16dp"
+        padding: "12dp", "8dp", "12dp", "12dp"
+        md_bg_color: self.theme_cls.surfaceContainerLowColor
+        radius: [0, 0, 8, 8]
+
+        # Sort filter
+        FilterItem:
+            FilterLabel:
+                text: "Sort By"
+            FilterDropDown:
+                id: sort_filter
+                text: root.get_display_text("sort", root.filters["sort"])
+                on_release: root.open_filter_menu(self, "sort")
+
+        # Status filter
+        FilterItem:
+            FilterLabel:
+                text: "Status"
+            FilterDropDown:
+                id: status_filter
+                text: root.get_display_text("status", root.filters["status"])
+                on_release: root.open_filter_menu(self, "status")
+
+        # Genre filter
+        FilterItem:
+            FilterLabel:
+                text: "Genre"
+            FilterDropDown:
+                id: genre_filter
+                text: root.get_display_text("genre", root.filters["genre"])
+                on_release: root.open_filter_menu(self, "genre")
+
+        # Format filter
+        FilterItem:
+            FilterLabel:
+                text: "Format"
+            FilterDropDown:
+                id: format_filter
+                text: root.get_display_text("format", root.filters["format"])
+                on_release: root.open_filter_menu(self, "format")
+
+        # Season filter
+        FilterItem:
+            FilterLabel:
+                text: "Season"
+            FilterDropDown:
+                id: season_filter
+                text: root.get_display_text("season", root.filters["season"])
+                on_release: root.open_filter_menu(self, "season")
+
+        # Year filter
+        FilterItem:
+            FilterLabel:
+                text: "Year"
+            FilterDropDown:
+                id: year_filter
+                text: root.get_display_text("year", root.filters["year"])
+                on_release: root.open_filter_menu(self, "year")
+
+        Widget:

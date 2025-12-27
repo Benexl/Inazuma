@@ -18,20 +18,24 @@ class SearchScreenController:
 
     def get_view(self) -> SearchScreenView:
         return self.view
-    
+
     def handle_search_for_anime(self, search_widget=None, page=None):
         if search_widget:
             search_term = search_widget.text
         elif page:
             search_term = self.search_term
         else:
-            return
+            search_term = ""
 
-        if search_term and not (self.is_searching):
+        if not self.is_searching:
             self.search_term = search_term
-            filters = self.view.filters.filters
+            filters = self.view.filters.filters.copy()
             filters["page"] = page if page else 1
             Thread(target=self._process_search, args=(search_term, filters)).start()
+
+    def apply_filters(self):
+        """Apply filters and search with current search term."""
+        self.handle_search_for_anime(page=1)
 
 
     def add_or_update_trending(self):
