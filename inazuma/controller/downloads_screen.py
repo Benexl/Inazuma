@@ -1,5 +1,5 @@
-from ..Model.download_screen import DownloadsScreenModel
-from ..View.DownloadsScreen.download_screen import DownloadsScreenView
+from ..model.download_screen import DownloadsScreenModel
+from ..view.DownloadsScreen.download_screen import DownloadsScreenView
 
 
 class DownloadsScreenController:

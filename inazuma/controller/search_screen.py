@@ -3,8 +3,8 @@ from threading import Thread
 from kivy.clock import Clock
 from kivy.logger import Logger
 
-from ..Model.search_screen import SearchScreenModel
-from ..View.SearchScreen.search_screen import SearchScreenView
+from ..model.search_screen import SearchScreenModel
+from ..view.SearchScreen.search_screen import SearchScreenView
 
 
 class SearchScreenController:

@@ -2,8 +2,8 @@ from typing import TYPE_CHECKING
 
 from kivy.cache import Cache
 from kivy.logger import Logger
-from inazuma.Model.anime_screen import AnimeScreenModel
-from inazuma.View.AnimeScreen.anime_screen import AnimeScreenView
+from inazuma.model.anime_screen import AnimeScreenModel
+from inazuma.view.AnimeScreen.anime_screen import AnimeScreenView
 
 if TYPE_CHECKING:
     from viu_media.libs.media_api.types import MediaItem

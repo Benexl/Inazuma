@@ -1,5 +1,5 @@
-from ..Utility.media_card_loader import media_card_loader
-from ..Utility.show_notification import show_notification
+from ..utility.media_card_loader import media_card_loader
+from ..utility.show_notification import show_notification
 from .base_model import BaseScreenModel
 
 

@@ -1,7 +1,7 @@
 from kivy.clock import Clock
 from kivy.properties import ObjectProperty, StringProperty
 
-from ...View.base_screen import BaseScreenView
+from ...view.base_screen import BaseScreenView
 from .components.filters import Filters
 from .components.pagination import SearchResultsPagination
 from .components.trending_sidebar import TrendingAnimeSideBar
@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from viu_media.libs.media_api.types import MediaSearchResult, PageInfo
-    from inazuma.Controller.search_screen import SearchScreenController
+    from inazuma.controller.search_screen import SearchScreenController
 
 
 class SearchScreenView(BaseScreenView):

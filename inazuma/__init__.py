@@ -5,8 +5,8 @@ from kivy.resources import resource_find
 from kivy.uix.screenmanager import FadeTransition, ScreenManager
 from kivy.uix.settings import SettingsWithSidebar
 from kivymd.app import MDApp
-from inazuma.View.screens import screens
-from inazuma.View.components.media_card.media_card import MediaPopup
+from inazuma.view.screens import screens
+from inazuma.view.components.media_card.media_card import MediaPopup
 
 
 from typing import TYPE_CHECKING
@@ -71,7 +71,7 @@ class Inazuma(MDApp):
             self.manager_screens.current = "search screen"
         search_screen = self.manager_screens.get_screen("search screen")
         search_screen.controller.handle_search_for_anime(search_field, **kwargs)
-    
+
     def show_anime_screen(self, media_item: "MediaItem", caller_screen_name: str):
         self.manager_screens.current = anime_screen_name = "anime screen"
         self.manager_screens.get_screen(anime_screen_name).controller.update_anime_view(
@@ -111,7 +111,7 @@ class Inazuma(MDApp):
     #     pass
     # from viu_media.cli.service.download import DownloadService
     #
-    # from .Utility.show_notification import show_notification
+    # from .utility.show_notification import show_notification
     #
     # self.download_screen.new_download_task(anime_title)
     # show_notification("New Download", f"{anime_title[0]} episode: {anime_title[1]}")

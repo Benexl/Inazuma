@@ -3,9 +3,9 @@ from kivy.logger import Logger
 from typing import TYPE_CHECKING
 
 
-from ...View.base_screen import BaseScreenView
+from ...view.base_screen import BaseScreenView
 
-from inazuma.View.components.media_card import MediaCard, MediaCardsContainer
+from inazuma.view.components.media_card import MediaCard, MediaCardsContainer
 
 if TYPE_CHECKING:
     from viu_media.libs.media_api.types import MediaSearchResult

@@ -1,7 +1,7 @@
 from kivy.clock import Clock
 from kivy.properties import ObjectProperty
 
-from ...View.base_screen import BaseScreenView
+from ...view.base_screen import BaseScreenView
 
 
 class MyListScreenView(BaseScreenView):

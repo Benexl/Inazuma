@@ -6,7 +6,7 @@ from kivymd.uix.navigationrail import MDNavigationRail, MDNavigationRailItem
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.tooltip import MDTooltip
 
-from ..Utility.observer import Observer
+from ..utility.observer import Observer
 
 
 class NavRail(MDNavigationRail):
@@ -43,7 +43,7 @@ class BaseScreenView(MDScreen, Observer):
 
     controller = ObjectProperty()
     """
-    Controller object - :class:`~Controller.controller_screen.ClassScreenControler`.
+    controller object - :class:`~controller.controller_screen.ClassScreenControler`.
 
     :attr:`controller` is an :class:`~kivy.properties.ObjectProperty`
     and defaults to `None`.
@@ -51,7 +51,7 @@ class BaseScreenView(MDScreen, Observer):
 
     model = ObjectProperty()
     """
-    Model object - :class:`~Model.model_screen.ClassScreenModel`.
+    model object - :class:`~model.model_screen.ClassScreenModel`.
 
     :attr:`model` is an :class:`~kivy.properties.ObjectProperty`
     and defaults to `None`.

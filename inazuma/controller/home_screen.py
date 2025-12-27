@@ -2,8 +2,8 @@ from kivy.clock import Clock
 from threading import Thread
 from kivy.logger import Logger
 
-from ..Model.home_screen import HomeScreenModel
-from ..View.HomeScreen.home_screen import HomeScreenView
+from ..model.home_screen import HomeScreenModel
+from ..view.HomeScreen.home_screen import HomeScreenView
 
 
 # TODO:Move the update home screen to homescreen.py
@@ -19,7 +19,7 @@ class HomeScreenController:
     _discover_anime_list = []
 
     def __init__(self, model: HomeScreenModel):
-        self.model = model  # Model.main_screen.MainScreenModel
+        self.model = model  # model.main_screen.MainScreenModel
         self.view = HomeScreenView(controller=self, model=self.model)
 
         self._discover_anime_list = [
