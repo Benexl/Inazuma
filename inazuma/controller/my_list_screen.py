@@ -1,14 +1,10 @@
-from inspect import isgenerator
-from math import ceil
-
+from kivy.clock import Clock
+from threading import Thread
 from kivy.logger import Logger
 
-# from kivy.clock import Clock
-from kivy.utils import difference
 
-from ..model.my_list_screen import MyListScreenModel
-from ..utility import user_data_helper
-from ..view.MylistScreen.my_list_screen import MyListScreenView
+from inazuma.model.my_list_screen import MyListScreenModel
+from inazuma.view.MylistScreen.my_list_screen import MyListScreenView
 
 
 class MyListScreenController:
@@ -22,29 +18,57 @@ class MyListScreenController:
     def __init__(self, model: MyListScreenModel):
         self.model = model
         self.view = MyListScreenView(controller=self, model=self.model)
-        # if len(self.requested_update_my_list_screen()) > 30:
-        self.requested_update_my_list_screen()
+
+        self._discover_anime_list = [
+            {
+                "list_name": "Watching",
+                "data_getter": self.model.get_watching,
+            },
+            {
+                "list_name": "Repeating",
+                "data_getter": self.model.get_repeating,
+            },
+            {
+                "list_name": "Paused",
+                "data_getter": self.model.get_paused,
+            },
+            {
+                "list_name": "Planning",
+                "data_getter": self.model.get_planning,
+            },
+            {
+                "list_name": "Completed",
+                "data_getter": self.model.get_completed,
+            },
+            {
+                "list_name": "Dropped",
+                "data_getter": self.model.get_dropped,
+            },
+        ]
+    def get_all_anime_lists(self):
+        if not self._discover_anime_list:
+            return
+        self._discover_anime_list.reverse()
+
+        self.get_more_anime()
+        self.get_more_anime()
+        self.get_more_anime()
+        self.get_more_anime()
+        self.get_more_anime()
+        self.get_more_anime()
 
     def get_view(self) -> MyListScreenView:
         return self.view
 
-    def requested_update_my_list_screen(self):
-        _user_anime_list = user_data_helper.get_user_anime_list()
-        if animes_to_add := difference(
-            _user_anime_list, self.model.already_in_user_anime_list
-        ):
-            no_of_updates = ceil(len(animes_to_add) / 30)
-            Logger.info("MyList Screen:Change detected updating screen")
-            for i in range(no_of_updates):
-                _animes_to_add = animes_to_add[i * 30 : (i + 1) * 30]
-                anime_cards = self.model.update_my_anime_list_view(_animes_to_add)
+    def get_more_anime(self):
+        task = self._discover_anime_list.pop()
+        Thread(target=self._process_anime_list, args=(task,)).start()
 
-                if isgenerator(anime_cards):
-                    for result_card in anime_cards:
-                        result_card["screen"] = self.view
-                        self.view.update_layout(result_card)
-            self.model.already_in_user_anime_list = _user_anime_list
-            return animes_to_add
+    def _process_anime_list(self, task):
+        anime_list = task["data_getter"]()
+        Clock.schedule_once(
+            lambda dt: self.view.add_new_anime_list(task["list_name"], anime_list)
+        )
 
 
 __all__ = ["MyListScreenController"]

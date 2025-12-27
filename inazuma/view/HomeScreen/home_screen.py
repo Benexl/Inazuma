@@ -22,5 +22,7 @@ class HomeScreenView(BaseScreenView):
             cards_container.container.add_widget(card)
         self.main_container.add_widget(cards_container)
 
+    def on_pre_enter(self, *args):
+        self.controller.get_all_anime_lists()
 
 __all__ = ["HomeScreenView"]

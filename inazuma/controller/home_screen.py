@@ -2,8 +2,8 @@ from kivy.clock import Clock
 from threading import Thread
 from kivy.logger import Logger
 
-from ..model.home_screen import HomeScreenModel
-from ..view.HomeScreen.home_screen import HomeScreenView
+from inazuma.model.home_screen import HomeScreenModel
+from inazuma.view.HomeScreen.home_screen import HomeScreenView
 
 
 # TODO:Move the update home screen to homescreen.py
@@ -36,7 +36,7 @@ class HomeScreenController:
                 "data_getter": self.model.get_most_popular_anime,
             },
             {
-                "list_name": "Recent",
+                "list_name": "Recently Updated",
                 "data_getter": self.model.get_most_recently_updated_anime,
             },
             {
@@ -49,6 +49,12 @@ class HomeScreenController:
             },
         ]
 
+    def get_all_anime_lists(self):
+        if not self._discover_anime_list:
+            return
+        self._discover_anime_list.reverse()
+
+        self.get_more_anime()
         self.get_more_anime()
         self.get_more_anime()
         self.get_more_anime()

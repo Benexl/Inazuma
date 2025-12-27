@@ -29,6 +29,8 @@ class Inazuma(MDApp):
         self.viu_config = AppConfig()
 
         self.viu = Viu(self.viu_config)
+        if "MEDIA_API_TOKEN" in os.environ:
+            self.viu.media_api.authenticate(os.environ["MEDIA_API_TOKEN"])
         # self.icon = resource_find("logo.png")
 
         self.load_all_kv_files(self.directory)

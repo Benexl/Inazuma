@@ -1,23 +1,47 @@
-from ..utility.media_card_loader import media_card_loader
-from ..utility.show_notification import show_notification
-from .base_model import BaseScreenModel
+from inazuma.model.base_model import BaseScreenModel
+from typing import TYPE_CHECKING
+from viu_media.libs.media_api.params import UserMediaListSearchParams
+from viu_media.libs.media_api.types import UserMediaListStatus
+
+if TYPE_CHECKING:
+    from inazuma.core.viu import Viu
 
 
 class MyListScreenModel(BaseScreenModel):
     already_in_user_anime_list = []
 
-    def update_my_anime_list_view(self, not_yet_in_user_anime_list: list):
-        success, self.data = AniList.search(
-            id_in=not_yet_in_user_anime_list, sort="SCORE_DESC"
-        )
-        if success:
-            return self.media_card_generator()
-        else:
-            show_notification(
-                "Failed to update my list screen view", self.data["Error"]
-            )
-            return None
+    viu: "Viu"
 
-    def media_card_generator(self):
-        for anime_item in self.data["data"]["Page"]["media"]:
-            yield media_card_loader.media_card(anime_item)
+    def __init__(self, viu: "Viu") -> None:
+        super().__init__()
+        self.viu = viu
+
+    def get_watching(self):
+        return self.viu.media_api.search_media_list(
+            UserMediaListSearchParams(status=UserMediaListStatus.WATCHING)
+        )
+
+    def get_paused(self):
+        return self.viu.media_api.search_media_list(
+            UserMediaListSearchParams(status=UserMediaListStatus.PAUSED)
+        )
+
+    def get_planning(self):
+        return self.viu.media_api.search_media_list(
+            UserMediaListSearchParams(status=UserMediaListStatus.PLANNING)
+        )
+
+    def get_completed(self):
+        return self.viu.media_api.search_media_list(
+            UserMediaListSearchParams(status=UserMediaListStatus.COMPLETED)
+        )
+
+    def get_dropped(self):
+        return self.viu.media_api.search_media_list(
+            UserMediaListSearchParams(status=UserMediaListStatus.DROPPED)
+        )
+
+    def get_repeating(self):
+        return self.viu.media_api.search_media_list(
+            UserMediaListSearchParams(status=UserMediaListStatus.REPEATING)
+        )
