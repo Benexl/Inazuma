@@ -7,7 +7,7 @@ from kivy.uix.settings import SettingsWithSidebar
 from kivymd.app import MDApp
 from inazuma.view.screens import screens
 from inazuma.view.components.media_card.media_card import MediaPopup
-
+from kivy.logger import Logger
 
 from typing import TYPE_CHECKING
 
@@ -38,6 +38,9 @@ class Inazuma(MDApp):
         self.theme_cls.primary_palette = "Lightcoral"
         self.manager_screens = ScreenManager()
         self.manager_screens.transition = FadeTransition()
+
+        # Track active downloads by a unique key (media_id + episode)
+        self.active_downloads = {}
 
     def build(self) -> ScreenManager:
         self.settings_cls = SettingsWithSidebar
@@ -83,22 +86,20 @@ class Inazuma(MDApp):
     def play_on_external_player(
         self,
         url: str,
-        title: str,
         episode: str,
         media_item: "MediaItem",
         server: "Server",
     ):
-        from viu_media.cli.service.player import PlayerService
         from viu_media.libs.player.params import PlayerParams
         from threading import Thread
 
-        player_service = PlayerService(self.viu.config, self.viu.anime_provider)
+        episode_title = media_item.title.english + f"; Episode {episode}"
         player_thread = Thread(
-            target=player_service.play,
+            target=self.viu.player_service.play,
             args=(
                 PlayerParams(
                     url=url,
-                    title=title,
+                    title=episode_title,
                     episode=episode,
                     query=media_item.title.romaji or media_item.title.english,
                     headers=server.headers,
@@ -109,18 +110,93 @@ class Inazuma(MDApp):
         player_thread.start()
 
     #
-    # def download_anime_video(self, url: str, anime_title, anime_server):
-    #     pass
-    # from viu_media.cli.service.download import DownloadService
-    #
-    # from .utility.show_notification import show_notification
-    #
-    # self.download_screen.new_download_task(anime_title)
-    # show_notification("New Download", f"{anime_title[0]} episode: {anime_title[1]}")
-    # progress_hook = self.download_screen.on_episode_download_progress
-    # downloader.download_file(
-    #     url, anime_title, anime_server["episode_title"], USER_VIDEOS_DIR
-    # )
+    def download_media(
+        self, url: str, episode: str, media_item: "MediaItem", server: "Server"
+    ):
+        from inazuma.utility.notification import show_notification
+        from threading import Thread
+
+        # Create unique identifier for this download task
+        task_id = f"{media_item.id}_{episode}"
+
+        # Check if already downloading
+        if task_id in self.active_downloads:
+            show_notification(
+                "Download In Progress",
+                f"{media_item.title.english}; Episode {episode} is already downloading",
+            )
+            return
+
+        download_screen = self.manager_screens.get_screen("downloads screen")
+        download_screen.controller.new_download_task(media_item, episode, server)
+
+        # Mark as active
+        self.active_downloads[task_id] = True
+
+        # Create progress hook that includes task_id
+        def progress_hook(data):
+            download_screen.controller.on_episode_download_progress(task_id, data)
+
+        download_thread = Thread(
+            target=self._add_media_to_download_queue,
+            args=(task_id, url, episode, media_item, server, [progress_hook]),
+            daemon=True,
+        )
+        download_thread.start()
+
+        show_notification(
+            "New Download", f"{media_item.title.english}; Episode {episode}"
+        )
+
+    def _add_media_to_download_queue(
+        self,
+        task_id: str,
+        url: str,
+        episode: str,
+        media_item: "MediaItem",
+        server: "Server",
+        progress_hooks=[],
+    ):
+        from viu_media.core.downloader import DownloadParams
+        from inazuma.utility.notification import show_notification
+
+        try:
+            episode_title = f"{media_item.title.english}; Episode {episode}"
+            download_result = self.viu.downloader.download(
+                DownloadParams(
+                    url=url,
+                    anime_title=media_item.title.english,
+                    episode_title=episode_title,
+                    silent=True,
+                    headers=server.headers,
+                    progress_hooks=progress_hooks,
+                    logger=Logger,
+                )
+            )
+
+            # Handle completion
+            if download_result:
+                show_notification(
+                    "Download Complete",
+                    f"{media_item.title.english}; Episode {episode}",
+                )
+
+                # Update download screen to show completion
+                download_screen = self.manager_screens.get_screen("downloads screen")
+                download_screen.controller.on_download_complete(
+                    task_id, download_result
+                )
+        except Exception as e:
+            show_notification(
+                "Download Failed",
+                f"{media_item.title.english}; Episode {episode}: {str(e)}",
+            )
+            download_screen = self.manager_screens.get_screen("downloads screen")
+            download_screen.controller.on_download_error(task_id, str(e))
+        finally:
+            # Remove from active downloads
+            if task_id in self.active_downloads:
+                del self.active_downloads[task_id]
 
     #
     # def build_config(self, config):

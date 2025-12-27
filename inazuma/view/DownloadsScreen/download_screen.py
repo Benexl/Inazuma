@@ -1,9 +1,13 @@
 from kivy.clock import Clock
 from kivy.properties import ObjectProperty
-from kivy.utils import format_bytes_to_human
 
 from ...view.base_screen import BaseScreenView
 from .components.task_card import TaskCard
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from viu_media.libs.provider.anime.types import Server
+    from viu_media.libs.media_api.types import MediaItem
 
 
 class DownloadsScreenView(BaseScreenView):
@@ -11,19 +15,13 @@ class DownloadsScreenView(BaseScreenView):
     progress_bar = ObjectProperty()
     download_progress_label = ObjectProperty()
 
-    def new_download_task(self, filename):
-        Clock.schedule_once(
-            lambda _: self.main_container.add_widget(TaskCard(filename))
-        )
+    def add_task_card(self, media_item: "MediaItem", episode: str, server: "Server"):
+        task_card = TaskCard(media_item, episode, server)
+        Clock.schedule_once(lambda _: self.main_container.add_widget(task_card))
+        return task_card
 
-    def on_episode_download_progress(self, data):
-        percentage_completion = round(
-            (data.get("downloaded_bytes", 0) / data.get("total_bytes", 0)) * 100
-        )
-        speed = format_bytes_to_human(data.get("speed", 0)) if data.get("speed") else 0
-        progress_text = f"Downloading: {data.get('filename', 'unknown')} ({format_bytes_to_human(data.get('downloaded_bytes',0)) if data.get('downloaded_bytes') else 0}/{format_bytes_to_human(data.get('total_bytes',0)) if data.get('total_bytes') else 0})\n Elapsed: {round(data.get('elapsed',0)) if data.get('elapsed') else 0}s ETA: {data.get('eta',0) if data.get('eta') else 0}s Speed: {speed}/s"
-
-        self.progress_bar.value = max(min(percentage_completion, 100), 0)
+    def update_download_progress(self, percentage_completion: int, progress_text: str):
+        self.progress_bar.value = percentage_completion
         self.download_progress_label.text = progress_text
 
     def update_layout(self, widget):
