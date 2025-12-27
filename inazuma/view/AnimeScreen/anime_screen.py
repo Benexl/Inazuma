@@ -34,7 +34,8 @@ class AnimeScreenView(BaseScreenView):
     caller_screen_name = ObjectProperty()
     current_title = ""
     episodes_container = ObjectProperty()
-    total_episodes = 0
+    episodes_list = []
+    current_episode_index = 0
     current_episode = 1
     video_player = ObjectProperty()
     current_server_name = "sharepoint"
@@ -46,7 +47,7 @@ class AnimeScreenView(BaseScreenView):
 
     def update_episodes(self, episodes_list):
         self.episodes_container.data = []
-        self.total_episodes = len(episodes_list)
+        self.episodes_list = episodes_list
         for episode in episodes_list:
             self.episodes_container.data.append(
                 {
@@ -59,24 +60,30 @@ class AnimeScreenView(BaseScreenView):
             )
 
     def next_episode(self):
-        next_episode = int(self.current_episode + 1)
-        if next_episode <= self.total_episodes:
-            self.update_current_episode(str(next_episode))
+        next_index = self.current_episode_index + 1
+        if next_index < len(self.episodes_list):
+            next_episode = self.episodes_list[next_index]
+            self.update_current_episode(next_episode)
 
     def previous_episode(self):
-        previous_episode = self.current_episode - 1
-        if previous_episode > 0:
-            self.update_current_episode(str(previous_episode))
+        previous_index = self.current_episode_index - 1
+        if previous_index >= 0:
+            previous_episode = self.episodes_list[previous_index]
+            self.update_current_episode(previous_episode)
 
     def on_current_anime_data(self, instance, anime: "Anime"):
         episodes = anime.episodes.sub if True else anime.episodes.dub
         self.update_episodes(episodes)
-        self.current_episode = float("1")
+        if self.episodes_list:
+            self.current_episode_index = 0
+            self.current_episode = self.episodes_list[0]
         self.update_current_video_stream(self.current_server_name)
         self.video_player.state = "play"
 
     def update_current_episode(self, episode):
-        self.current_episode = float(episode)
+        self.current_episode = episode
+        if episode in self.episodes_list:
+            self.current_episode_index = self.episodes_list.index(episode)
         self.controller.fetch_streams(episode)
         self.update_current_video_stream(self.current_server_name)
         self.video_player.state = "play"
