@@ -1,7 +1,5 @@
 import logging
 
-from viu_media.libs.media_api.types import MediaItem
-from viu_media.libs.provider.anime.types import Server, Anime
 from kivy.properties import ListProperty, ObjectProperty, StringProperty
 from kivy.uix.widget import Factory
 from kivymd.uix.button import MDButton
@@ -10,6 +8,8 @@ from ...View.base_screen import BaseScreenView
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from viu_media.libs.media_api.types import MediaItem
+    from viu_media.libs.provider.anime.types import Server, Anime
     from inazuma.Controller.anime_screen import AnimeScreenController
 logger = logging.getLogger((__name__))
 

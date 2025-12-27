@@ -1,19 +1,19 @@
+import os
 import random
 
 from kivy.resources import resource_find
 from kivy.uix.screenmanager import FadeTransition, ScreenManager
 from kivy.uix.settings import SettingsWithSidebar
 from kivymd.app import MDApp
-from viu_media.core.config import AppConfig
-from viu_media.libs.provider.anime.types import Server
+from inazuma.View.screens import screens
+from inazuma.View.components.media_card.media_card import MediaPopup
 
-from .View.components.media_card.media_card import MediaPopup
-from .View.screens import screens
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from viu_media.libs.media_api.types import MediaItem
+    from viu_media.libs.provider.anime.types import Server
 
 
 class Inazuma(MDApp):
@@ -22,7 +22,9 @@ class Inazuma(MDApp):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        os.environ["VIU_APP_NAME"] = "inazuma"
         from inazuma.core.viu import Viu
+        from viu_media.core.config import AppConfig
 
         self.viu_config = AppConfig()
 

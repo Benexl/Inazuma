@@ -10,7 +10,11 @@ from kivy.properties import (
 from kivymd.app import MDApp
 from kivymd.uix.behaviors import HoverBehavior
 from kivymd.uix.boxlayout import MDBoxLayout
-from viu_media.libs.media_api.types import MediaItem
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from viu_media.libs.media_api.types import MediaItem
+
 
 from .components.media_popup import MediaPopup
 
@@ -42,7 +46,7 @@ class MediaCard(HoverBehavior, MDBoxLayout):
     _popup_opened = False
     _title = ()
 
-    def __init__(self, media_item: MediaItem, screen,**kwargs):
+    def __init__(self, media_item: "MediaItem", screen, **kwargs):
         super().__init__(**kwargs)
         self.media_item = media_item
         self.screen = screen

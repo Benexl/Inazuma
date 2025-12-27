@@ -6,7 +6,6 @@
 # from viu_media.libs.provider.anime.types import ProviderName
 from kivy.cache import Cache
 from kivy.logger import Logger
-from inazuma.core.viu import Viu
 
 from .base_model import BaseScreenModel
 from typing import TYPE_CHECKING
@@ -15,6 +14,7 @@ from dataclasses import dataclass
 if TYPE_CHECKING:
     from viu_media.libs.media_api.types import MediaItem
     from viu_media.libs.provider.anime.types import Anime, Server, EpisodeStream
+    from inazuma.core.viu import Viu
 Cache.register("streams.anime", limit=10)
 
 # anime_provider = create_provider(ProviderName.ALLANIME)
@@ -37,9 +37,9 @@ class AnimeScreenModel(BaseScreenModel):
     # current_provider_anime_id = "0"
     # current_title = ""
     # media_search_result: "MediaSearchResult | None" = None
-    viu: Viu
+    viu: "Viu"
 
-    def __init__(self, viu: Viu) -> None:
+    def __init__(self, viu: "Viu") -> None:
         super().__init__()
         self.viu = viu
         self.current_state = CurrentState()

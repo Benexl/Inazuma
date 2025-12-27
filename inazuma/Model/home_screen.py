@@ -1,15 +1,18 @@
 from .base_model import BaseScreenModel
+from typing import TYPE_CHECKING
 from viu_media.libs.media_api.params import MediaSearchParams
 from viu_media.libs.media_api.types import MediaSort, MediaStatus
-from inazuma.core.viu import Viu
+
+if TYPE_CHECKING:
+    from inazuma.core.viu import Viu
 
 
 class HomeScreenModel(BaseScreenModel):
     """The home screen model"""
 
-    viu: Viu
+    viu: "Viu"
 
-    def __init__(self, viu: Viu) -> None:
+    def __init__(self, viu: "Viu") -> None:
         super().__init__()
         self.viu = viu
 
