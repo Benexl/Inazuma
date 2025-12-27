@@ -299,6 +299,7 @@ class Inazuma(MDApp):
 
         elif section == "Viu":
             self._apply_viu_config_change(key, value)
+            self.viu.reset()
 
     def _apply_viu_config_change(self, key: str, value):
         """Apply a config change to viu.config dynamically."""
@@ -426,7 +427,7 @@ class Inazuma(MDApp):
 
         episode_title = media_item.title.english + f"; Episode {episode}"
         player_thread = Thread(
-            target=self.viu.player_service.play,
+            target=self.viu.player.play,
             args=(
                 PlayerParams(
                     url=url,

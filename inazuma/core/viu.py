@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from viu_media.cli.service.registry import MediaRegistryService
     from viu_media.cli.service.player import PlayerService
     from viu_media.core.downloader.base import BaseDownloader
+    from viu_media.libs.player.base import BasePlayer
 
 
 @dataclass
@@ -17,9 +18,19 @@ class Viu:
     _media_api: "BaseApiClient | None" = None
     _anime_provider: "BaseAnimeProvider | None" = None
     _registry_service: "MediaRegistryService | None" = None
+    _player: "BasePlayer | None" = None
     _player_service: "PlayerService | None" = None
     _downloader: "BaseDownloader | None" = None
     _download_service: "DownloadService | None" = None
+
+    def reset(self):
+        self._media_api = None
+        self._anime_provider = None
+        self._registry_service = None
+        self._player = None
+        self._player_service = None
+        self._downloader = None
+        self._download_service = None
 
     @property
     def media_api(self) -> "BaseApiClient":
@@ -38,6 +49,14 @@ class Viu:
 
             self._anime_provider = create_provider(self.config.general.provider)
         return self._anime_provider
+
+    @property
+    def player(self) -> "BasePlayer":
+        if not self._player:
+            from viu_media.libs.player import create_player
+
+            self._player = create_player(self.config)
+        return self._player
 
     @property
     def registry_service(self) -> "MediaRegistryService":
