@@ -37,7 +37,7 @@ class SettingScrollOptions(SettingOptions):
         content = GridLayout(cols=1, spacing="5dp")
         scrollview = ScrollView(do_scroll_x=False)
         scrollcontent = GridLayout(cols=1, spacing="5dp", size_hint=(None, None))
-        scrollcontent.bind(minimum_height=scrollcontent.setter("height")) # type: ignore
+        scrollcontent.bind(minimum_height=scrollcontent.setter("height"))  # type: ignore
         self.popup = popup = Popup(
             content=content, title=self.title, size_hint=(0.5, 0.9), auto_dismiss=False
         )
@@ -47,7 +47,7 @@ class SettingScrollOptions(SettingOptions):
         # Add some space on top
         content.add_widget(Widget(size_hint_y=None, height=dp(2)))
         # add all the options
-        uid = str(self.uid) # type: ignore
+        uid = str(self.uid)  # type: ignore
         for option in self.options:
             state = "down" if option == self.value else "normal"
             btn = ToggleButton(
@@ -57,7 +57,7 @@ class SettingScrollOptions(SettingOptions):
                 size=(popup.width, dp(55)),
                 size_hint=(None, None),
             )
-            btn.bind(on_release=self._set_option) # type: ignore
+            btn.bind(on_release=self._set_option)  # type: ignore
             scrollcontent.add_widget(btn)
 
         # finally, add a cancel button to return on the previous panel
@@ -66,7 +66,7 @@ class SettingScrollOptions(SettingOptions):
         content.add_widget(SettingSpacer())
         # btn = Button(text='Cancel', size=((oORCA.iAppWidth/2)-sp(25), dp(50)),size_hint=(None, None))
         btn = Button(text="Cancel", size=(popup.width, dp(50)), size_hint=(0.9, None))
-        btn.bind(on_release=popup.dismiss) # type: ignore
+        btn.bind(on_release=popup.dismiss)  # type: ignore
         content.add_widget(btn)
 
 
@@ -127,6 +127,124 @@ class Inazuma(MDApp):
             },
         )
 
+        # Viu settings - dynamically extract from AppConfig
+        viu_defaults = self._get_viu_config_defaults()
+        config.setdefaults("Viu", viu_defaults)
+
+    def _get_viu_config_defaults(self) -> dict:
+        """Dynamically extract default values from viu.config (AppConfig)."""
+        from enum import Enum
+
+        defaults = {}
+        viu_cfg = self.viu.config
+
+        for section_name, section_model in viu_cfg:
+            if section_name in ("fzf", "rofi"):
+                continue
+            for field_name in section_model.model_fields:
+                value = getattr(section_model, field_name)
+                # Convert enum to its value
+                if isinstance(value, Enum):
+                    value = value.value
+                # Convert Path to string
+                elif hasattr(value, "__fspath__"):
+                    value = str(value)
+
+                key = f"{section_name}_{field_name}"
+                defaults[key] = value
+
+        return defaults
+
+    def _get_viu_settings(self) -> list:
+        """Dynamically generate Kivy settings JSON from viu.config (AppConfig)."""
+        import itertools
+
+        viu_cfg = self.viu.config
+        settings = []
+
+        for section_name, section_model in viu_cfg:
+            if section_name in ("fzf", "rofi"):
+                continue
+
+            # Add section title
+            section_title = section_model.model_config.get(
+                "title", section_name.replace("_", " ").title()
+            )
+            settings.append({"type": "title", "title": section_title})
+
+            for field_name, field_info in itertools.chain(
+                section_model.model_fields.items(),
+                section_model.model_computed_fields.items(),
+            ):
+                field_type = getattr(field_info, "annotation", None) or getattr(
+                    field_info, "return_type", None
+                )
+                field_value = getattr(section_model, field_name)
+
+                # Skip None/unset fields
+                if field_value is None:
+                    continue
+
+                # Determine Kivy setting type and options
+                setting_type, options = self._get_kivy_setting_type(field_type)
+
+                # Build the setting entry
+                key = f"{section_name}_{field_name}"
+                title = field_name.replace("_", " ").title()
+                desc = field_info.description or ""
+
+                setting_entry = {
+                    "type": setting_type,
+                    "title": title,
+                    "desc": desc,
+                    "section": "Viu",
+                    "key": key,
+                }
+
+                if options:
+                    setting_entry["options"] = options
+
+                settings.append(setting_entry)
+
+        return settings
+
+    def _get_kivy_setting_type(self, field_type) -> tuple:
+        """Map Pydantic field type to Kivy setting type and options."""
+        from enum import Enum
+        from pathlib import Path
+        from typing import Literal, get_args, get_origin
+
+        options = None
+
+        # Check for Enum
+        if (
+            field_type is not None
+            and isinstance(field_type, type)
+            and issubclass(field_type, Enum)
+        ):
+            options = [member.value for member in field_type]
+            return ("scrolloptions", options)
+
+        # Check for Literal
+        if get_origin(field_type) is Literal:
+            args = get_args(field_type)
+            if args:
+                options = list(args)
+                return ("scrolloptions", options)
+
+        # Basic types
+        if field_type is bool:
+            return ("bool", None)
+        if field_type in (int, float):
+            return ("numeric", None)
+        if field_type is Path or (
+            hasattr(field_type, "__origin__") and field_type.__origin__ is Path
+        ):
+            return ("path", None)
+
+        # Default to string
+        return ("string", None)
+
     def build_settings(self, settings: "Settings"):
         settings.register_type("scrolloptions", SettingScrollOptions)
         app_settings = [
@@ -155,11 +273,16 @@ class Inazuma(MDApp):
                 "key": "downloads_dir",
             },
         ]
+        viu_settings = self._get_viu_settings()
 
-        settings.add_json_panel("Inazuma Settings", self.config, data=json.dumps(app_settings))
+        settings.add_json_panel(
+            "Inazuma Settings", self.config, data=json.dumps(app_settings)
+        )
+        settings.add_json_panel(
+            "Viu Settings", self.config, data=json.dumps(viu_settings)
+        )
 
     def on_config_change(self, config, section, key, value):
-        # TODO: Change to match case
         if section == "Preferences":
             match key:
                 case "theme_color":
@@ -173,6 +296,102 @@ class Inazuma(MDApp):
                         config.write()
                 case "theme_style":
                     self.theme_cls.theme_style = value
+
+        elif section == "Viu":
+            self._apply_viu_config_change(key, value)
+
+    def _apply_viu_config_change(self, key: str, value):
+        """Apply a config change to viu.config dynamically."""
+        from enum import Enum
+        from pathlib import Path
+
+        # Key format is "{section_name}_{field_name}"
+        parts = key.split("_", 1)
+        if len(parts) != 2:
+            Logger.warning(f"Inazuma Settings: Invalid Viu config key format: {key}")
+            return
+
+        section_name, field_name = parts
+
+        # Get the section model from viu.config
+        if not hasattr(self.viu.config, section_name):
+            Logger.warning(
+                f"Inazuma Settings: Unknown Viu config section: {section_name}"
+            )
+            return
+
+        section_model = getattr(self.viu.config, section_name)
+
+        if not hasattr(section_model, field_name):
+            Logger.warning(
+                f"Inazuma Settings: Unknown field '{field_name}' in section '{section_name}'"
+            )
+            return
+
+        # Get field info to determine the expected type
+        field_info = section_model.model_fields.get(field_name)
+        if not field_info:
+            Logger.warning(
+                f"Inazuma Settings: No field info for {section_name}.{field_name}"
+            )
+            return
+
+        field_type = field_info.annotation
+
+        # Convert the value to the appropriate type
+        try:
+            converted_value = self._convert_config_value(value, field_type)
+            setattr(section_model, field_name, converted_value)
+            Logger.info(
+                f"Inazuma Settings: Updated {section_name}.{field_name} = {converted_value}"
+            )
+        except (ValueError, TypeError) as e:
+            Logger.warning(
+                f"Inazuma Settings: Failed to convert value for {section_name}.{field_name}: {e}"
+            )
+
+    def _convert_config_value(self, value, field_type):
+        """Convert a config value string to the appropriate Python type."""
+        from enum import Enum
+        from pathlib import Path
+        from typing import Literal, get_args, get_origin
+
+        # Handle None
+        if value is None or value == "":
+            return None
+
+        # Handle Enum types
+        if (
+            field_type is not None
+            and isinstance(field_type, type)
+            and issubclass(field_type, Enum)
+        ):
+            return field_type(value)
+
+        # Handle Literal types
+        if get_origin(field_type) is Literal:
+            args = get_args(field_type)
+            if value in args:
+                return value
+            raise ValueError(f"Value '{value}' not in Literal options: {args}")
+
+        # Handle basic types
+        if field_type is bool:
+            if isinstance(value, bool):
+                return value
+            return value.lower() in ("true", "1", "yes", "on")
+
+        if field_type is int:
+            return int(value)
+
+        if field_type is float:
+            return float(value)
+
+        if field_type is Path:
+            return Path(value)
+
+        # Default: return as string
+        return str(value)
 
     def generate_application_screens(self) -> None:
         for i, name_screen in enumerate(screens.keys()):
