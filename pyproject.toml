@@ -14,3 +14,8 @@ dependencies = [
 [tool.uv.sources]
 kivymd = { git = "https://github.com/kivymd/KivyMD.git" }
 viu-media = { git = "https://github.com/viu-media/viu.git" }
+
+[dependency-groups]
+dev = [
+    "pyinstaller>=6.17.0",
+]
